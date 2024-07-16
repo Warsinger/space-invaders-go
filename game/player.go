@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/yohamta/donburi"
 )
 
@@ -27,11 +28,13 @@ const (
 	Right
 )
 
-func (p *PlayerData) Update(pos *PositionData, v *VelocityData) error {
+func (p *PlayerData) Update(w donburi.World, pos *PositionData, v *VelocityData) error {
 	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
 		p.Move(Right, pos, v)
 	} else if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
 		p.Move(Left, pos, v)
+	} else if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		p.Shoot(w, pos, v)
 	}
 	return nil
 }
@@ -44,3 +47,22 @@ func (p *PlayerData) Move(dir Direction, pos *PositionData, v *VelocityData) {
 	}
 	pos.X += delta
 }
+
+func (p *PlayerData) Shoot(w donburi.World, pos *PositionData, v *VelocityData) {
+	entity := w.Create(Bullet, Position, Velocity)
+	entry := w.Entry(entity)
+	Position.SetValue(entry, PositionData{X: pos.X + 24, Y: pos.Y - 10})
+	Velocity.SetValue(entry, VelocityData{X: 0, Y: 3})
+}
+
+type BulletData struct {
+}
+
+var Bullet = donburi.NewComponentType[BulletData]()
+
+type BulletRenderData struct {
+	Length, Width float64
+	Color         ebiten.ColorScale
+}
+
+var BulletRender = donburi.NewComponentType[BulletRenderData]()

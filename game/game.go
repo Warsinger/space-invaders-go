@@ -66,7 +66,7 @@ func (g *GameInfo) Update() error {
 
 		if entry.HasComponent(Player) {
 			player := Player.Get(entry)
-			err = player.Update(position, velocity)
+			err = player.Update(g.world, position, velocity)
 			if err != nil {
 				return
 			}
