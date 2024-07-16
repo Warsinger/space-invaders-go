@@ -11,7 +11,7 @@ Space Invaders in Go using an [Donburi ECS](https://github.com/yohamta/donburi/)
 * ~~use https://github.com/yohamta/donburi/ to create a game~~
 * Fire bullets
   * Destroy aliens
-* Swarm of aliens
+* ~~Swarm of aliens~~
 * Destructible Barriers
 * Track scores
   * Write high scores to a file

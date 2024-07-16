@@ -86,7 +86,7 @@ func (g *GameInfo) Update() error {
 func (g *GameInfo) Init() error {
 	LoadAssets()
 	NewPlayer(g.world)
-	NewAlien(g.world)
+	NewAliens(g.world, 4, 10)
 	return nil
 }
 

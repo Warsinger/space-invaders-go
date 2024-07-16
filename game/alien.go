@@ -9,10 +9,23 @@ type AlienData struct {
 
 var Alien = donburi.NewComponentType[AlienData]()
 
-func NewAlien(w donburi.World) {
+const xOffset = 60
+const xBorder = 25
+const yOffset = 60
+const yBorder = 25
+
+func NewAliens(w donburi.World, rows, columns int) {
+	for r := 0; r < rows; r++ {
+		for c := 0; c < columns; c++ {
+			NewAlien(w, float64(xBorder+c*xOffset), float64(yBorder+r*yOffset))
+		}
+	}
+}
+
+func NewAlien(w donburi.World, x, y float64) {
 	entity := w.Create(Alien, Position, Velocity, Sprite)
 	entry := w.Entry(entity)
-	Position.SetValue(entry, PositionData{X: 100, Y: 100})
+	Position.SetValue(entry, PositionData{X: x, Y: y})
 	Velocity.SetValue(entry, VelocityData{X: 3, Y: 50})
 	Sprite.SetValue(entry, SpriteData{image: GetImage("alien")})
 }
