@@ -10,10 +10,12 @@ import (
 func main() {
 
 	g := game.NewGame()
+	g.Init()
 
-	mX, mY := ebiten.Monitor().Size()
+	// mX, mY := ebiten.Monitor().Size()
 
-	ebiten.SetWindowSize(mX-50, mY-50)
+	// ebiten.SetWindowSize(mX-50, mY-50)
+	ebiten.SetWindowSize(800, 600)
 	ebiten.SetWindowTitle("Space Invaders")
 	// ebiten.SetWindowDecorated(false)
 	// ebiten.SetTPS(15)
