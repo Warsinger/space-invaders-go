@@ -1,4 +1,4 @@
-package game
+package components
 
 import (
 	"github.com/yohamta/donburi"
@@ -27,11 +27,11 @@ func NewAliens(w donburi.World, rows, columns int) {
 }
 
 func NewAlien(w donburi.World, x, y float64) {
-	entity := w.Create(Alien, Position, Velocity, Sprite)
+	entity := w.Create(Alien, Position, Velocity, Render)
 	entry := w.Entry(entity)
 	Position.SetValue(entry, PositionData{X: x, Y: y})
 	Velocity.SetValue(entry, VelocityData{X: 1, Y: 10})
-	Sprite.SetValue(entry, SpriteData{image: GetImage("alien")})
+	Render.SetValue(entry, RenderData{&SpriteData{image: GetImage("alien")}})
 	Alien.SetValue(entry, AlienData{XStart: x, XRange: 75, YStart: y, YRange: 500})
 }
 

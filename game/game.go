@@ -1,6 +1,8 @@
 package game
 
 import (
+	comp "space-invaders/components"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/yohamta/donburi"
@@ -51,29 +53,40 @@ func (g *GameInfo) Update() error {
 	// query for all entities
 	query := donburi.NewQuery(
 		filter.And(
-			filter.Contains(Position, Velocity),
+			filter.Contains(comp.Position, comp.Velocity, comp.Render),
 			filter.Or(
-				filter.Contains(Player),
-				filter.Contains(Alien),
+				filter.Contains(comp.Player),
+				filter.Contains(comp.Alien),
+				filter.Contains(comp.Bullet),
 			),
 		),
 	)
 	var err error = nil
 	// update all entities
 	query.Each(g.world, func(entry *donburi.Entry) {
-		position := Position.Get(entry)
-		velocity := Velocity.Get(entry)
+		position := comp.Position.Get(entry)
+		velocity := comp.Velocity.Get(entry)
 
-		if entry.HasComponent(Player) {
-			player := Player.Get(entry)
+		if entry.HasComponent(comp.Player) {
+			player := comp.Player.Get(entry)
 			err = player.Update(g.world, position, velocity)
 			if err != nil {
 				return
 			}
 		}
-		if entry.HasComponent(Alien) {
-			alien := Alien.Get(entry)
+
+		if entry.HasComponent(comp.Alien) {
+			alien := comp.Alien.Get(entry)
 			err = alien.Update(position, velocity)
+			if err != nil {
+				return
+			}
+
+		}
+
+		if entry.HasComponent(comp.Bullet) {
+			b := comp.Bullet.Get(entry)
+			err = b.Update(position, velocity)
 			if err != nil {
 				return
 			}
@@ -84,9 +97,9 @@ func (g *GameInfo) Update() error {
 }
 
 func (g *GameInfo) Init() error {
-	LoadAssets()
-	NewPlayer(g.world)
-	NewAliens(g.world, 4, 10)
+	comp.LoadAssets()
+	comp.NewPlayer(g.world)
+	comp.NewAliens(g.world, 4, 10)
 	return nil
 }
 
@@ -96,18 +109,17 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 	// query for all entities
 	query := donburi.NewQuery(
 		filter.And(
-			filter.Contains(Position, Sprite),
+			filter.Contains(comp.Position, comp.Render),
 		),
 	)
 
 	// draw all entities
 	query.Each(g.world, func(entry *donburi.Entry) {
-		position := Position.Get(entry)
-		sprite := Sprite.Get(entry)
+		position := comp.Position.Get(entry)
+		r := comp.Render.Get(entry)
+		r.Draw(screen, position)
 
-		sprite.Draw(screen, position)
 	})
-
 }
 
 func (g *GameInfo) Layout(width, height int) (int, int) {

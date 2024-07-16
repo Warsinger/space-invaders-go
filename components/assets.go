@@ -1,4 +1,4 @@
-package game
+package components
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/yohamta/donburi"
 )
 
 var images map[string]*ebiten.Image = make(map[string]*ebiten.Image)
@@ -14,8 +13,6 @@ var images map[string]*ebiten.Image = make(map[string]*ebiten.Image)
 type SpriteData struct {
 	image *ebiten.Image
 }
-
-var Sprite = donburi.NewComponentType[SpriteData]()
 
 func LoadAssets() error {
 	err := loadImageAsset("alien")
@@ -45,9 +42,9 @@ func GetImage(name string) *ebiten.Image {
 	return images[name]
 }
 
-func (s *SpriteData) Draw(screen *ebiten.Image, position *PositionData) {
+func (s *SpriteData) Draw(screen *ebiten.Image, pos *PositionData) {
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(position.X, position.Y)
+	opts.GeoM.Translate(pos.X, pos.Y)
 	// opts.GeoM.Scale(1, 1)
 	screen.DrawImage(s.image, opts)
 }
