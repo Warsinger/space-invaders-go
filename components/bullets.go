@@ -18,8 +18,6 @@ type BulletRenderData struct {
 	Color         color.Color
 }
 
-// var BulletRender = donburi.NewComponentType[BulletRenderData]()
-
 func (brd *BulletRenderData) Draw(screen *ebiten.Image, pos *PositionData) {
 	vector.StrokeLine(screen, float32(pos.X), float32(pos.Y), float32(pos.X), float32(pos.Y+brd.Length), float32(brd.Width), brd.Color, true)
 }

@@ -50,7 +50,6 @@ func (g *GameInfo) Update() error {
 
 	// query for all entities that have position and velocity and ???
 	// and have them do their updates
-	// query for all entities
 	query := donburi.NewQuery(
 		filter.And(
 			filter.Contains(comp.Position, comp.Velocity, comp.Render),
