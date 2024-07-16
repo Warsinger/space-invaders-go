@@ -5,6 +5,10 @@ import (
 )
 
 type AlienData struct {
+	XStart float64
+	XRange float64
+	YStart float64
+	YRange float64
 }
 
 var Alien = donburi.NewComponentType[AlienData]()
@@ -26,17 +30,23 @@ func NewAlien(w donburi.World, x, y float64) {
 	entity := w.Create(Alien, Position, Velocity, Sprite)
 	entry := w.Entry(entity)
 	Position.SetValue(entry, PositionData{X: x, Y: y})
-	Velocity.SetValue(entry, VelocityData{X: 3, Y: 50})
+	Velocity.SetValue(entry, VelocityData{X: 1, Y: 10})
 	Sprite.SetValue(entry, SpriteData{image: GetImage("alien")})
+	Alien.SetValue(entry, AlienData{XStart: x, XRange: 75, YStart: y, YRange: 500})
 }
 
 func (a *AlienData) Update(pos *PositionData, v *VelocityData) error {
 	pos.X += v.X
-	if pos.X > 750 {
-		pos.X = 50
+	if pos.X > a.XStart+a.XRange || pos.X < a.XStart {
+		if pos.X < a.XStart {
+			pos.X = a.XStart
+		} else {
+			pos.X = a.XStart + a.XRange
+		}
+		v.X = -v.X
 		pos.Y += v.Y
-		if pos.Y > 550 {
-			pos.Y = 50
+		if pos.Y > a.YRange {
+			pos.Y = a.YStart // TODO this should kill the player
 		}
 	}
 	return nil
