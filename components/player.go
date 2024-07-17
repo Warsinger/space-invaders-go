@@ -1,10 +1,12 @@
 package components
 
 import (
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/yohamta/donburi"
 )
 
@@ -87,4 +89,25 @@ func (p *PlayerData) AddScore(score int) {
 
 func (p *PlayerData) GetScore() int {
 	return p.score
+}
+
+func (p *PlayerData) IsDead() bool {
+	return p.dead
+}
+
+func (p *PlayerData) Kill() {
+	p.dead = true
+}
+
+func (p *PlayerData) GetRect(entry *donburi.Entry) image.Rectangle {
+	sprite := Render.Get(entry)
+	return sprite.renderer.GetRect(entry)
+}
+
+func (p *PlayerData) DrawDead(screen *ebiten.Image, entry *donburi.Entry) {
+	if p.dead {
+		rect := p.GetRect(entry)
+		vector.StrokeLine(screen, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Max.X), float32(rect.Max.Y), 3, color.RGBA{255, 0, 0, 255}, true)
+		vector.StrokeLine(screen, float32(rect.Max.X), float32(rect.Min.Y), float32(rect.Min.X), float32(rect.Max.Y), 3, color.RGBA{255, 0, 0, 255}, true)
+	}
 }

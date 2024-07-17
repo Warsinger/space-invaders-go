@@ -12,8 +12,9 @@ import (
 )
 
 type GameInfo struct {
-	world donburi.World
-	ecs   *ecslib.ECS
+	world    donburi.World
+	ecs      *ecslib.ECS
+	gameOver bool
 }
 
 func NewGame() (*GameInfo, error) {
@@ -33,6 +34,7 @@ func NewGame() (*GameInfo, error) {
 	return &GameInfo{
 		world,
 		ecs,
+		false,
 	}, nil
 }
 
@@ -49,6 +51,7 @@ func (g *GameInfo) Init() error {
 }
 
 func (g *GameInfo) Clear() error {
+	g.gameOver = false
 	query := donburi.NewQuery(filter.Or(
 		filter.Contains(comp.Bullet),
 		filter.Contains(comp.Player),
@@ -74,6 +77,10 @@ func (g *GameInfo) Update() error {
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		return ebiten.Termination
+	}
+
+	if g.gameOver {
+		return nil
 	}
 
 	// query for all entities that have position and velocity and ???
@@ -154,6 +161,21 @@ func (g *GameInfo) DetectCollisions() error {
 		})
 	})
 
+	// check for aliens reaching bottem
+	pe := comp.Player.MustFirst(g.world)
+	player := comp.Player.Get(pe)
+	pRect := player.GetRect(pe)
+	query = donburi.NewQuery(filter.Contains(comp.Alien))
+	query.Each(g.world, func(ae *donburi.Entry) {
+		alien := comp.Alien.Get(ae)
+		aRect := alien.GetRect(ae)
+
+		if aRect.Max.Y >= pRect.Min.Y {
+			player.Kill()
+			g.gameOver = true
+		}
+	})
+
 	return err
 }
 
@@ -171,7 +193,12 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 	query.Each(g.world, func(entry *donburi.Entry) {
 		r := comp.Render.Get(entry)
 		r.Draw(screen, entry)
-
+		if entry.HasComponent(comp.Player) {
+			player := comp.Player.Get(entry)
+			if player.IsDead() {
+				player.DrawDead(screen, entry)
+			}
+		}
 	})
 }
 

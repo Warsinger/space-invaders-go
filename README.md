@@ -13,7 +13,7 @@ Space Invaders in Go using an [Donburi ECS](https://github.com/yohamta/donburi/)
 * ~~Fire bullets~~
 * ~~collision detection~~
   * ~~Destroy aliens~~
-  * Kill player
+  * ~~Kill player~~
 * ~~Swarm of aliens~~
 * Destructible Barriers
 * ~~Track scores~~
