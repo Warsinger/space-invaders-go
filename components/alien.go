@@ -19,9 +19,9 @@ type AlienData struct {
 var Alien = donburi.NewComponentType[AlienData]()
 
 const xOffset = 60
-const xBorder = 25
+const xBorder = 10
 const yOffset = 60
-const yBorder = 25
+const yBorder = 40
 
 func NewAliens(w donburi.World, rows, columns int) error {
 	query := donburi.NewQuery(filter.Contains(Board))

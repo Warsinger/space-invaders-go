@@ -1,11 +1,13 @@
 package components
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/yohamta/donburi"
 )
@@ -20,7 +22,11 @@ var Player = donburi.NewComponentType[PlayerData]()
 func NewPlayer(w donburi.World) error {
 	entity := w.Create(Player, Position, Velocity, Render)
 	entry := w.Entry(entity)
-	Position.SetValue(entry, PositionData{x: 350, y: 460})
+
+	be := Board.MustFirst(entry.World)
+	board := Board.Get(be)
+
+	Position.SetValue(entry, PositionData{x: board.Width / 2, y: board.Height - yBorder})
 	Velocity.SetValue(entry, VelocityData{x: 5, y: 0})
 	Render.SetValue(entry, RenderData{&SpriteData{image: GetImage("ship")}})
 	return nil
@@ -104,10 +110,18 @@ func (p *PlayerData) GetRect(entry *donburi.Entry) image.Rectangle {
 	return sprite.renderer.GetRect(entry)
 }
 
-func (p *PlayerData) DrawDead(screen *ebiten.Image, entry *donburi.Entry) {
+func (p *PlayerData) Draw(screen *ebiten.Image, entry *donburi.Entry) {
 	if p.dead {
 		rect := p.GetRect(entry)
 		vector.StrokeLine(screen, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Max.X), float32(rect.Max.Y), 3, color.RGBA{255, 0, 0, 255}, true)
 		vector.StrokeLine(screen, float32(rect.Max.X), float32(rect.Min.Y), float32(rect.Min.X), float32(rect.Max.Y), 3, color.RGBA{255, 0, 0, 255}, true)
 	}
+	// draw score
+	str := fmt.Sprintf("SCORE %04d", p.score)
+	op := &text.DrawOptions{}
+	// op.LineSpacing = scoreFace.Size * 1.5
+	x, _ := text.Measure(str, ScoreFace, op.LineSpacing)
+	op.GeoM.Translate(400-x/2, 5)
+	text.Draw(screen, str, ScoreFace, op)
+
 }

@@ -1,11 +1,11 @@
 package game
 
 import (
-	"fmt"
 	comp "space-invaders/components"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/yohamta/donburi"
 	ecslib "github.com/yohamta/donburi/ecs"
 	"github.com/yohamta/donburi/filter"
@@ -43,7 +43,7 @@ func (g *GameInfo) Init() error {
 	if err != nil {
 		return err
 	}
-	err = comp.NewAliens(g.world, 4, 10)
+	err = comp.NewAliens(g.world, 4, 12)
 	if err != nil {
 		return err
 	}
@@ -150,14 +150,11 @@ func (g *GameInfo) DetectCollisions() error {
 				pe := comp.Player.MustFirst(g.world)
 				player := comp.Player.Get(pe)
 				player.AddScore(alien.GetScoreValue())
-				fmt.Printf("Player score: %v\n", player.GetScore())
 
 				// remove bullet and alien
 				g.world.Remove(ae.Entity())
 				g.world.Remove(be.Entity())
-
 			}
-
 		})
 	})
 
@@ -195,11 +192,19 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 		r.Draw(screen, entry)
 		if entry.HasComponent(comp.Player) {
 			player := comp.Player.Get(entry)
-			if player.IsDead() {
-				player.DrawDead(screen, entry)
-			}
+			player.Draw(screen, entry)
+
 		}
 	})
+
+	if g.gameOver {
+		str := "GAME OVER"
+		op := &text.DrawOptions{}
+		// op.LineSpacing = scoreFace.Size * 1.5
+		x, y := text.Measure(str, comp.ScoreFace, op.LineSpacing)
+		op.GeoM.Translate(400-x/2, 300-y/2)
+		text.Draw(screen, str, comp.ScoreFace, op)
+	}
 }
 
 func (g *GameInfo) Layout(width, height int) (int, int) {

@@ -2,7 +2,16 @@ module space-invaders
 
 go 1.22.5
 
-require github.com/hajimehoshi/ebiten/v2 v2.7.7
+require (
+	github.com/hajimehoshi/ebiten v1.12.12
+	github.com/hajimehoshi/ebiten/v2 v2.7.7
+)
+
+require (
+	github.com/go-text/typesetting v0.1.1-0.20240325125605-c7936fe59984 // indirect
+	golang.org/x/image v0.18.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
+)
 
 require (
 	github.com/ebitengine/gomobile v0.0.0-20240518074828-e86332849895 // indirect
