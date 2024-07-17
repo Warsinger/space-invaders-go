@@ -19,9 +19,11 @@ Space Invaders in Go using an [Donburi ECS](https://github.com/yohamta/donburi/)
 * ~~Track scores~~
   * Write high scores to a file
 * Different aliens
+* Aliens shoot
 * Cool background
-* Levels with speed ups
+* ~~Levels with speed ups~~
 * ~~Reset game~~
+* 
 * Stretch: Webassembly for Browser
 
 ## Images

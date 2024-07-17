@@ -119,7 +119,6 @@ func (p *PlayerData) Draw(screen *ebiten.Image, entry *donburi.Entry) {
 	// draw score
 	str := fmt.Sprintf("SCORE %04d", p.score)
 	op := &text.DrawOptions{}
-	// op.LineSpacing = scoreFace.Size * 1.5
 	x, _ := text.Measure(str, ScoreFace, op.LineSpacing)
 	op.GeoM.Translate(400-x/2, 5)
 	text.Draw(screen, str, ScoreFace, op)

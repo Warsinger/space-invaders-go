@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	comp "space-invaders/components"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -15,6 +16,7 @@ type GameInfo struct {
 	world    donburi.World
 	ecs      *ecslib.ECS
 	gameOver bool
+	level    int
 }
 
 func NewGame() (*GameInfo, error) {
@@ -35,6 +37,7 @@ func NewGame() (*GameInfo, error) {
 		world,
 		ecs,
 		false,
+		1,
 	}, nil
 }
 
@@ -43,7 +46,7 @@ func (g *GameInfo) Init() error {
 	if err != nil {
 		return err
 	}
-	err = comp.NewAliens(g.world, 4, 12)
+	err = comp.NewAliens(g.world, g.level, 4, 12)
 	if err != nil {
 		return err
 	}
@@ -131,7 +134,39 @@ func (g *GameInfo) Update() error {
 	if err != nil {
 		return err
 	}
+
+	// check for all aliens destroyed or aliens reaching bottem
+	pe := comp.Player.MustFirst(g.world)
+	player := comp.Player.Get(pe)
+	pRect := player.GetRect(pe)
+	query = donburi.NewQuery(filter.Contains(comp.Alien))
+	if query.Count(g.world) == 0 {
+		err := g.NewLevel()
+		if err != nil {
+			return err
+		}
+	} else {
+		query.Each(g.world, func(ae *donburi.Entry) {
+			alien := comp.Alien.Get(ae)
+			aRect := alien.GetRect(ae)
+
+			if aRect.Max.Y >= pRect.Min.Y {
+				player.Kill()
+				g.gameOver = true
+			}
+		})
+	}
+
 	return err
+}
+
+func (g *GameInfo) NewLevel() error {
+	g.level++
+	err := comp.NewAliens(g.world, g.level, 4, 12)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (g *GameInfo) DetectCollisions() error {
@@ -158,21 +193,6 @@ func (g *GameInfo) DetectCollisions() error {
 		})
 	})
 
-	// check for aliens reaching bottem
-	pe := comp.Player.MustFirst(g.world)
-	player := comp.Player.Get(pe)
-	pRect := player.GetRect(pe)
-	query = donburi.NewQuery(filter.Contains(comp.Alien))
-	query.Each(g.world, func(ae *donburi.Entry) {
-		alien := comp.Alien.Get(ae)
-		aRect := alien.GetRect(ae)
-
-		if aRect.Max.Y >= pRect.Min.Y {
-			player.Kill()
-			g.gameOver = true
-		}
-	})
-
 	return err
 }
 
@@ -197,10 +217,14 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 		}
 	})
 
+	str := fmt.Sprintf("LEVEL %02d", g.level)
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(5, 5)
+	text.Draw(screen, str, comp.ScoreFace, op)
+
 	if g.gameOver {
 		str := "GAME OVER"
 		op := &text.DrawOptions{}
-		// op.LineSpacing = scoreFace.Size * 1.5
 		x, y := text.Measure(str, comp.ScoreFace, op.LineSpacing)
 		op.GeoM.Translate(400-x/2, 300-y/2)
 		text.Draw(screen, str, comp.ScoreFace, op)

@@ -23,16 +23,20 @@ const xBorder = 10
 const yOffset = 60
 const yBorder = 40
 
-func NewAliens(w donburi.World, rows, columns int) error {
+func NewAliens(w donburi.World, level, rows, columns int) error {
 	query := donburi.NewQuery(filter.Contains(Board))
 	be, found := query.First(w)
 	board := Board.Get(be)
 	if !found {
 		log.Fatal("No Board found")
 	}
+	// past a certain level don't just increase the speed but increase the rows by 1
+	if level > 10 {
+		rows++
+	}
 	for r := 0; r < rows; r++ {
 		for c := 0; c < columns; c++ {
-			err := NewAlien(w, board, xBorder+c*xOffset, yBorder+r*yOffset)
+			err := NewAlien(w, board, level, xBorder+c*xOffset, yBorder+r*yOffset)
 			if err != nil {
 				return err
 			}
@@ -41,11 +45,11 @@ func NewAliens(w donburi.World, rows, columns int) error {
 	return nil
 }
 
-func NewAlien(w donburi.World, b *BoardInfo, x, y int) error {
+func NewAlien(w donburi.World, b *BoardInfo, level, x, y int) error {
 	entity := w.Create(Alien, Position, Velocity, Render)
 	entry := w.Entry(entity)
 	Position.SetValue(entry, PositionData{x: x, y: y})
-	Velocity.SetValue(entry, VelocityData{x: 1, y: 10})
+	Velocity.SetValue(entry, VelocityData{x: level, y: 10})
 	Render.SetValue(entry, RenderData{&SpriteData{image: GetImage("alien")}})
 	Alien.SetValue(entry, AlienData{xStart: x, xRange: 75, yStart: y, yRange: b.Height, scoreValue: 10})
 	return nil
