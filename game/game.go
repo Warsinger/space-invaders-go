@@ -15,24 +15,18 @@ type GameInfo struct {
 	world donburi.World
 	ecs   *ecslib.ECS
 }
-type Game interface {
-	GetWorld() donburi.World
-	GetECS() *ecslib.ECS
 
-	Update() error
-	Draw(screen *ebiten.Image)
-	Layout(width, height int) (int, int)
-	Init() error
-}
-
-func NewGame() (Game, error) {
+func NewGame() (*GameInfo, error) {
 	world := donburi.NewWorld()
 	ecs := ecslib.NewECS(world)
 	board, err := comp.NewBoard(world)
 	if err != nil {
 		return nil, err
 	}
-
+	err = comp.LoadAssets()
+	if err != nil {
+		return nil, err
+	}
 	ebiten.SetWindowSize(int(board.Width), int(board.Height))
 	ebiten.SetWindowTitle("Space Invaders")
 
@@ -43,11 +37,7 @@ func NewGame() (Game, error) {
 }
 
 func (g *GameInfo) Init() error {
-	err := comp.LoadAssets()
-	if err != nil {
-		return err
-	}
-	err = comp.NewPlayer(g.world)
+	err := comp.NewPlayer(g.world)
 	if err != nil {
 		return err
 	}
@@ -55,6 +45,18 @@ func (g *GameInfo) Init() error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (g *GameInfo) Clear() error {
+	query := donburi.NewQuery(filter.Or(
+		filter.Contains(comp.Bullet),
+		filter.Contains(comp.Player),
+		filter.Contains(comp.Alien),
+	))
+	query.Each(g.world, func(e *donburi.Entry) {
+		g.world.Remove(e.Entity())
+	})
 	return nil
 }
 
@@ -67,6 +69,7 @@ func (g *GameInfo) GetECS() *ecslib.ECS {
 
 func (g *GameInfo) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		g.Clear()
 		g.Init()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
