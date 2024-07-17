@@ -30,6 +30,10 @@ func LoadAssets() error {
 	if err != nil {
 		return err
 	}
+	err = loadImageAsset("background")
+	if err != nil {
+		return err
+	}
 
 	s, err := text.NewGoTextFaceSource(bytes.NewReader(fonts.ArcadeN_ttf))
 	if err != nil {

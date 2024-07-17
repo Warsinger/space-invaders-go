@@ -199,6 +199,10 @@ func (g *GameInfo) DetectCollisions() error {
 func (g *GameInfo) Draw(screen *ebiten.Image) {
 	screen.Clear()
 
+	img := comp.GetImage("background")
+	opts := &ebiten.DrawImageOptions{}
+	screen.DrawImage(img, opts)
+
 	// query for all entities
 	query := donburi.NewQuery(
 		filter.And(
