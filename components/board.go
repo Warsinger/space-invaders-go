@@ -1,9 +1,9 @@
-package game
+package components
 
 import "github.com/yohamta/donburi"
 
 type BoardInfo struct {
-	Width, Height float64
+	Width, Height int
 }
 
 var Board = donburi.NewComponentType[BoardInfo]()

@@ -2,16 +2,18 @@ package components
 
 import (
 	"image"
+	"log"
 
 	"github.com/yohamta/donburi"
+	"github.com/yohamta/donburi/filter"
 )
 
 type AlienData struct {
-	XStart     int
-	XRange     int
-	YStart     int
-	YRange     int
-	ScoreValue int
+	xStart     int
+	xRange     int
+	yStart     int
+	yRange     int
+	scoreValue int
 }
 
 var Alien = donburi.NewComponentType[AlienData]()
@@ -22,9 +24,15 @@ const yOffset = 60
 const yBorder = 25
 
 func NewAliens(w donburi.World, rows, columns int) error {
+	query := donburi.NewQuery(filter.Contains(Board))
+	be, found := query.First(w)
+	board := Board.Get(be)
+	if !found {
+		log.Fatal("No Board found")
+	}
 	for r := 0; r < rows; r++ {
 		for c := 0; c < columns; c++ {
-			err := NewAlien(w, xBorder+c*xOffset, yBorder+r*yOffset)
+			err := NewAlien(w, board, xBorder+c*xOffset, yBorder+r*yOffset)
 			if err != nil {
 				return err
 			}
@@ -33,30 +41,31 @@ func NewAliens(w donburi.World, rows, columns int) error {
 	return nil
 }
 
-func NewAlien(w donburi.World, x, y int) error {
+func NewAlien(w donburi.World, b *BoardInfo, x, y int) error {
 	entity := w.Create(Alien, Position, Velocity, Render)
 	entry := w.Entry(entity)
-	Position.SetValue(entry, PositionData{X: x, Y: y})
-	Velocity.SetValue(entry, VelocityData{X: 1, Y: 10})
+	Position.SetValue(entry, PositionData{x: x, y: y})
+	Velocity.SetValue(entry, VelocityData{x: 1, y: 10})
 	Render.SetValue(entry, RenderData{&SpriteData{image: GetImage("alien")}})
-	Alien.SetValue(entry, AlienData{XStart: x, XRange: 75, YStart: y, YRange: 500, ScoreValue: 10})
+	Alien.SetValue(entry, AlienData{xStart: x, xRange: 75, yStart: y, yRange: b.Height, scoreValue: 10})
 	return nil
 }
 
 func (a *AlienData) Update(entry *donburi.Entry) error {
 	pos := Position.Get(entry)
 	v := Velocity.Get(entry)
-	pos.X += v.X
-	if pos.X > a.XStart+a.XRange || pos.X < a.XStart {
-		if pos.X < a.XStart {
-			pos.X = a.XStart
+
+	pos.x += v.x
+	if pos.x > a.xStart+a.xRange || pos.x < a.xStart {
+		if pos.x < a.xStart {
+			pos.x = a.xStart
 		} else {
-			pos.X = a.XStart + a.XRange
+			pos.x = a.xStart + a.xRange
 		}
-		v.X = -v.X
-		pos.Y += v.Y
-		if pos.Y > a.YRange {
-			pos.Y = a.YStart // TODO this should kill the player
+		v.x = -v.x
+		pos.y += v.y
+		if pos.y > a.yRange {
+			pos.y = a.yStart // TODO this should kill the player
 		}
 	}
 	return nil
@@ -64,9 +73,9 @@ func (a *AlienData) Update(entry *donburi.Entry) error {
 
 func (a *AlienData) GetRect(entry *donburi.Entry) image.Rectangle {
 	sprite := Render.Get(entry)
-	return sprite.Renderer.GetRect(entry)
+	return sprite.renderer.GetRect(entry)
 }
 
 func (a *AlienData) GetScoreValue() int {
-	return a.ScoreValue
+	return a.scoreValue
 }

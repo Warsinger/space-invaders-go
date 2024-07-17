@@ -28,7 +28,7 @@ type Game interface {
 func NewGame() (Game, error) {
 	world := donburi.NewWorld()
 	ecs := ecslib.NewECS(world)
-	board, err := NewBoard(world)
+	board, err := comp.NewBoard(world)
 	if err != nil {
 		return nil, err
 	}
@@ -40,6 +40,22 @@ func NewGame() (Game, error) {
 		world,
 		ecs,
 	}, nil
+}
+
+func (g *GameInfo) Init() error {
+	err := comp.LoadAssets()
+	if err != nil {
+		return err
+	}
+	err = comp.NewPlayer(g.world)
+	if err != nil {
+		return err
+	}
+	err = comp.NewAliens(g.world, 4, 10)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (g *GameInfo) GetWorld() donburi.World {
@@ -110,11 +126,7 @@ func (g *GameInfo) Update() error {
 
 func (g *GameInfo) DetectCollisions() error {
 	var err error = nil
-	query := donburi.NewQuery(
-		filter.And(
-			filter.Contains(comp.Bullet),
-		),
-	)
+	query := donburi.NewQuery(filter.Contains(comp.Bullet))
 	query.Each(g.world, func(be *donburi.Entry) {
 		brd := comp.Render.Get(be)
 		bRect := brd.GetRect(be)
@@ -140,22 +152,6 @@ func (g *GameInfo) DetectCollisions() error {
 	})
 
 	return err
-}
-
-func (g *GameInfo) Init() error {
-	err := comp.LoadAssets()
-	if err != nil {
-		return err
-	}
-	err = comp.NewPlayer(g.world)
-	if err != nil {
-		return err
-	}
-	err = comp.NewAliens(g.world, 4, 10)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (g *GameInfo) Draw(screen *ebiten.Image) {

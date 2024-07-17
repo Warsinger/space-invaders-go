@@ -10,29 +10,32 @@ import (
 )
 
 type BulletData struct {
-	Length, Width int
+	length, width int
 }
 
 var Bullet = donburi.NewComponentType[BulletData]()
 
 type BulletRenderData struct {
-	Color color.Color
+	color color.Color
 }
 
 func (brd *BulletRenderData) Draw(screen *ebiten.Image, entry *donburi.Entry) {
 	b := Bullet.Get(entry)
 	pos := Position.Get(entry)
-	vector.StrokeLine(screen, float32(pos.X), float32(pos.Y), float32(pos.X), float32(pos.Y+b.Length), float32(b.Width), brd.Color, true)
+	vector.StrokeLine(screen, float32(pos.x), float32(pos.y), float32(pos.x), float32(pos.y+b.length), float32(b.width), brd.color, true)
 }
 
 func (bd *BulletData) Update(entry *donburi.Entry) error {
 	pos := Position.Get(entry)
 	v := Velocity.Get(entry)
-	newY := pos.Y + v.Y
-	if newY < 0 {
+	newY := pos.y + v.y
+	be := Board.MustFirst(entry.World)
+	board := Board.Get(be)
+
+	if newY < 0 || newY > board.Height {
 		entry.World.Remove(entry.Entity())
 	} else {
-		pos.Y = newY
+		pos.y = newY
 	}
 	return nil
 }
@@ -40,5 +43,5 @@ func (bd *BulletData) Update(entry *donburi.Entry) error {
 func (brd *BulletRenderData) GetRect(entry *donburi.Entry) image.Rectangle {
 	pos := Position.Get(entry)
 	b := Bullet.Get(entry)
-	return image.Rect(pos.X, pos.Y, pos.X+b.Width, pos.Y+b.Length)
+	return image.Rect(pos.x, pos.y, pos.x+b.width, pos.y+b.length)
 }

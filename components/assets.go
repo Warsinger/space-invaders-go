@@ -47,7 +47,7 @@ func GetImage(name string) *ebiten.Image {
 func (s *SpriteData) Draw(screen *ebiten.Image, entry *donburi.Entry) {
 	pos := Position.Get(entry)
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(pos.X), float64(pos.Y))
+	opts.GeoM.Translate(float64(pos.x), float64(pos.y))
 	// opts.GeoM.Scale(1, 1)
 	screen.DrawImage(s.image, opts)
 }
@@ -55,5 +55,5 @@ func (s *SpriteData) Draw(screen *ebiten.Image, entry *donburi.Entry) {
 func (s *SpriteData) GetRect(entry *donburi.Entry) image.Rectangle {
 	pos := Position.Get(entry)
 	rect := s.image.Bounds()
-	return rect.Add(image.Pt(pos.X, pos.Y))
+	return rect.Add(image.Pt(pos.x, pos.y))
 }
