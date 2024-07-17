@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	comp "space-invaders/components"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -24,13 +25,21 @@ type Game interface {
 	Init() error
 }
 
-func NewGame() Game {
+func NewGame() (Game, error) {
 	world := donburi.NewWorld()
 	ecs := ecslib.NewECS(world)
+	board, err := NewBoard(world)
+	if err != nil {
+		return nil, err
+	}
+
+	ebiten.SetWindowSize(int(board.Width), int(board.Height))
+	ebiten.SetWindowTitle("Space Invaders")
+
 	return &GameInfo{
 		world,
 		ecs,
-	}
+	}, nil
 }
 
 func (g *GameInfo) GetWorld() donburi.World {
@@ -63,12 +72,9 @@ func (g *GameInfo) Update() error {
 	var err error = nil
 	// update all entities
 	query.Each(g.world, func(entry *donburi.Entry) {
-		position := comp.Position.Get(entry)
-		velocity := comp.Velocity.Get(entry)
-
 		if entry.HasComponent(comp.Player) {
 			player := comp.Player.Get(entry)
-			err = player.Update(g.world, position, velocity)
+			err = player.Update(g.world, entry)
 			if err != nil {
 				return
 			}
@@ -76,7 +82,7 @@ func (g *GameInfo) Update() error {
 
 		if entry.HasComponent(comp.Alien) {
 			alien := comp.Alien.Get(entry)
-			err = alien.Update(position, velocity)
+			err = alien.Update(entry)
 			if err != nil {
 				return
 			}
@@ -85,20 +91,70 @@ func (g *GameInfo) Update() error {
 
 		if entry.HasComponent(comp.Bullet) {
 			b := comp.Bullet.Get(entry)
-			err = b.Update(position, velocity)
+			err = b.Update(entry)
 			if err != nil {
 				return
 			}
 		}
+	})
+	// after updating all positions check for collisions
+	// get all the bullets, for each bullet loop through all the aliens (or other objects) and see if there are collisions
+	// if there is a collition, remove both objects (or subtract from their health)
+	// accumultate points for killing aliens
+	err = g.DetectCollisions()
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (g *GameInfo) DetectCollisions() error {
+	var err error = nil
+	query := donburi.NewQuery(
+		filter.And(
+			filter.Contains(comp.Bullet),
+		),
+	)
+	query.Each(g.world, func(be *donburi.Entry) {
+		brd := comp.Render.Get(be)
+		bRect := brd.GetRect(be)
+
+		query := donburi.NewQuery(filter.Contains(comp.Alien))
+		query.Each(g.world, func(ae *donburi.Entry) {
+			alien := comp.Alien.Get(ae)
+			aRect := alien.GetRect(ae)
+			if bRect.Overlaps(aRect) {
+				// increment score
+				pe := comp.Player.MustFirst(g.world)
+				player := comp.Player.Get(pe)
+				player.AddScore(alien.GetScoreValue())
+				fmt.Printf("Player score: %v\n", player.GetScore())
+
+				// remove bullet and alien
+				g.world.Remove(ae.Entity())
+				g.world.Remove(be.Entity())
+
+			}
+
+		})
 	})
 
 	return err
 }
 
 func (g *GameInfo) Init() error {
-	comp.LoadAssets()
-	comp.NewPlayer(g.world)
-	comp.NewAliens(g.world, 4, 10)
+	err := comp.LoadAssets()
+	if err != nil {
+		return err
+	}
+	err = comp.NewPlayer(g.world)
+	if err != nil {
+		return err
+	}
+	err = comp.NewAliens(g.world, 4, 10)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -114,9 +170,8 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 
 	// draw all entities
 	query.Each(g.world, func(entry *donburi.Entry) {
-		position := comp.Position.Get(entry)
 		r := comp.Render.Get(entry)
-		r.Draw(screen, position)
+		r.Draw(screen, entry)
 
 	})
 }

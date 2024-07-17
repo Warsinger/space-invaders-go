@@ -2,10 +2,12 @@ package components
 
 import (
 	"fmt"
+	"image"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/yohamta/donburi"
 )
 
 var images map[string]*ebiten.Image = make(map[string]*ebiten.Image)
@@ -42,9 +44,16 @@ func GetImage(name string) *ebiten.Image {
 	return images[name]
 }
 
-func (s *SpriteData) Draw(screen *ebiten.Image, pos *PositionData) {
+func (s *SpriteData) Draw(screen *ebiten.Image, entry *donburi.Entry) {
+	pos := Position.Get(entry)
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(pos.X, pos.Y)
+	opts.GeoM.Translate(float64(pos.X), float64(pos.Y))
 	// opts.GeoM.Scale(1, 1)
 	screen.DrawImage(s.image, opts)
+}
+
+func (s *SpriteData) GetRect(entry *donburi.Entry) image.Rectangle {
+	pos := Position.Get(entry)
+	rect := s.image.Bounds()
+	return rect.Add(image.Pt(pos.X, pos.Y))
 }
