@@ -4,8 +4,9 @@ Space Invaders in Go using an [Donburi ECS](https://github.com/yohamta/donburi/)
 ## Instructions
 * Arrow keys to move left and right
 * Space bar to fire
-* Q to quit
 * R to restart
+* P to pause
+* Q to quit
 
 ## TODO
 * Destructible Barriers
