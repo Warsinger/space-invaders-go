@@ -23,7 +23,7 @@ func NewPlayer(w donburi.World) error {
 	be := Board.MustFirst(entry.World)
 	board := Board.Get(be)
 
-	Position.SetValue(entry, PositionData{x: board.Width / 2, y: board.Height - yBorder})
+	Position.SetValue(entry, PositionData{x: board.Width / 2, y: board.Height - yBorderBottom})
 	Velocity.SetValue(entry, VelocityData{x: 5, y: 0})
 	Render.SetValue(entry, RenderData{&SpriteData{image: GetImage("ship")}})
 	return nil
