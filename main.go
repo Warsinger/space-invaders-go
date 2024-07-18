@@ -18,7 +18,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ebiten.SetTPS(60)
+	// ebiten.SetTPS(60)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
