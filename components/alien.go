@@ -1,6 +1,7 @@
 package components
 
 import (
+	"fmt"
 	"image"
 	"log"
 
@@ -36,7 +37,8 @@ func NewAliens(w donburi.World, level, rows, columns int) error {
 	}
 	for r := 0; r < rows; r++ {
 		for c := 0; c < columns; c++ {
-			err := NewAlien(w, board, level, xBorder+c*xOffset, yBorder+r*yOffset)
+			choose := (r+c)%2 + 1
+			err := NewAlien(w, board, level, xBorder+c*xOffset, yBorder+r*yOffset, choose)
 			if err != nil {
 				return err
 			}
@@ -45,12 +47,13 @@ func NewAliens(w donburi.World, level, rows, columns int) error {
 	return nil
 }
 
-func NewAlien(w donburi.World, b *BoardInfo, level, x, y int) error {
+func NewAlien(w donburi.World, b *BoardInfo, level, x, y, choose int) error {
 	entity := w.Create(Alien, Position, Velocity, Render)
 	entry := w.Entry(entity)
 	Position.SetValue(entry, PositionData{x: x, y: y})
 	Velocity.SetValue(entry, VelocityData{x: level, y: 10})
-	Render.SetValue(entry, RenderData{&SpriteData{image: GetImage("alien")}})
+	name := fmt.Sprintf("alien%v", choose)
+	Render.SetValue(entry, RenderData{&SpriteData{image: GetImage(name)}})
 	Alien.SetValue(entry, AlienData{xStart: x, xRange: 75, yStart: y, yRange: b.Height, scoreValue: 10 + level*5})
 	return nil
 }

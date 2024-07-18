@@ -62,7 +62,11 @@ func loadFonts() error {
 }
 
 func loadImages() error {
-	err := loadImageAsset("alien")
+	err := loadImageAsset("alien1")
+	if err != nil {
+		return err
+	}
+	err = loadImageAsset("alien2")
 	if err != nil {
 		return err
 	}
@@ -139,9 +143,16 @@ func GetImage(name string) *ebiten.Image {
 
 func (s *SpriteData) Draw(screen *ebiten.Image, entry *donburi.Entry) {
 	pos := Position.Get(entry)
+	v := Velocity.Get(entry)
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Translate(float64(pos.x), float64(pos.y))
-	// opts.GeoM.Scale(1, 1)
+
+	if v.x < 0 {
+		// this flips the image when it is going to the left
+		opts.GeoM.Translate(-float64(pos.x+s.image.Bounds().Dx()), float64(pos.y))
+		opts.GeoM.Scale(-1, 1)
+	} else {
+		opts.GeoM.Translate(float64(pos.x), float64(pos.y))
+	}
 	screen.DrawImage(s.image, opts)
 }
 
