@@ -203,11 +203,19 @@ func (g *GameInfo) EndGame() {
 
 func (g *GameInfo) NewLevel() error {
 	g.level++
+	g.RemoveBullets()
 	err := comp.NewAliens(g.world, g.level, 4, 12)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (g *GameInfo) RemoveBullets() {
+	query := donburi.NewQuery(filter.Contains(comp.Bullet))
+	query.Each(g.world, func(be *donburi.Entry) {
+		g.world.Remove(be.Entity())
+	})
 }
 
 func (g *GameInfo) DetectCollisions() error {

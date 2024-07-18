@@ -17,11 +17,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// mX, mY := ebiten.Monitor().Size()
 
-	// ebiten.SetWindowSize(mX-50, mY-50)
-	// ebiten.SetWindowDecorated(false)
-	// ebiten.SetTPS(15)
+	ebiten.SetTPS(60)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
