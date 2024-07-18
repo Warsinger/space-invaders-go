@@ -8,23 +8,23 @@ Space Invaders in Go using an [Donburi ECS](https://github.com/yohamta/donburi/)
 * R to restart
 
 ## TODO
+* Destructible Barriers
+* Different aliens
+* Aliens shoot
+* Stretch: Webassembly for Browser
 * ~~use https://github.com/yohamta/donburi/ to create a game~~
-* ~~Define board size~~, borders, kill zone
 * ~~Fire bullets~~
+* ~~Define board size, borders, kill zone~~
 * ~~collision detection~~
   * ~~Destroy aliens~~
   * ~~Kill player~~
 * ~~Swarm of aliens~~
-* Destructible Barriers
 * ~~Track scores~~
-  * Write high scores to a file
-* Different aliens
-* Aliens shoot
+  * ~~Write high scores to a file~~
 * ~~Cool background~~
 * ~~Levels with speed ups~~
 * ~~Reset game~~
-* 
-* Stretch: Webassembly for Browser
+* ~~Audio for shots and explosions~~
 
 ## Images
 ### Player
