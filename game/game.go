@@ -18,6 +18,7 @@ type GameInfo struct {
 	world     donburi.World
 	ecs       *ecslib.ECS
 	gameOver  bool
+	paused    bool
 	level     int
 	score     int
 	highScore int
@@ -88,6 +89,7 @@ func (g *GameInfo) Init() error {
 
 func (g *GameInfo) Clear() error {
 	g.gameOver = false
+	g.paused = false
 	g.score = 0
 	g.level = 1
 	query := donburi.NewQuery(filter.Or(
@@ -119,6 +121,13 @@ func (g *GameInfo) Update() error {
 	}
 
 	if g.gameOver {
+		return nil
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		g.paused = !g.paused
+	}
+	if g.paused {
 		return nil
 	}
 
@@ -291,6 +300,13 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 	if g.gameOver {
 		// draw game over
 		str := "GAME OVER"
+		op := &text.DrawOptions{}
+		x, y := text.Measure(str, comp.ScoreFace, op.LineSpacing)
+		op.GeoM.Translate(400-x/2, 300-y/2)
+		text.Draw(screen, str, comp.ScoreFace, op)
+	} else if g.paused {
+		// draw paused
+		str := "PAUSED"
 		op := &text.DrawOptions{}
 		x, y := text.Measure(str, comp.ScoreFace, op.LineSpacing)
 		op.GeoM.Translate(400-x/2, 300-y/2)
