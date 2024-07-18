@@ -43,3 +43,6 @@ Recent development
 
 ### Game Over
 ![Game Over](docs/gameover.png)
+
+## Gameplay Video
+[Gameplay on Youtube](https://youtu.be/7HiF58Qha1s)
