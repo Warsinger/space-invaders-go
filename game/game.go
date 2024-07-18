@@ -54,15 +54,11 @@ const highScoreFile = "score/highscore.txt"
 func LoadScores() int {
 	var highScore int = 0
 	bytes, err := os.ReadFile(highScoreFile)
-	fmt.Printf("bytes %s\n", string(bytes))
-	fmt.Printf("read err %v %T\n", err, err)
-	// if err != nil {
-	highScore, err = strconv.Atoi(string(bytes))
-	fmt.Printf("hs: %d\n", highScore)
-	fmt.Printf("conv err %v\n", err)
-	//}
-	if err != nil {
-		fmt.Printf("final err %v\n", err)
+	if err == nil {
+		highScore, err = strconv.Atoi(string(bytes))
+		if err != nil {
+			fmt.Printf("WARN high score formatting err %v\n", err)
+		}
 	}
 
 	return highScore
