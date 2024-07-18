@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/ebitengine/oto/v3 v3.2.0 // indirect
 	github.com/go-text/typesetting v0.1.1-0.20240325125605-c7936fe59984 // indirect
 	golang.org/x/image v0.18.0 // indirect
 	golang.org/x/text v0.16.0 // indirect

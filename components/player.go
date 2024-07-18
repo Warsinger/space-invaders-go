@@ -1,20 +1,17 @@
 package components
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/yohamta/donburi"
 )
 
 type PlayerData struct {
-	score int
-	dead  bool
+	dead bool
 }
 
 var Player = donburi.NewComponentType[PlayerData]()
@@ -87,14 +84,8 @@ func (p *PlayerData) Shoot(w donburi.World, entry *donburi.Entry) {
 	Velocity.SetValue(bEntry, VelocityData{x: 0, y: -3})
 	Render.SetValue(bEntry, RenderData{&BulletRenderData{color: color.RGBA{255, 215, 0, 255}}})
 	Bullet.SetValue(bEntry, BulletData{length: 10, width: 3})
-}
 
-func (p *PlayerData) AddScore(score int) {
-	p.score += score
-}
-
-func (p *PlayerData) GetScore() int {
-	return p.score
+	PlaySound("shoot")
 }
 
 func (p *PlayerData) IsDead() bool {
@@ -116,11 +107,4 @@ func (p *PlayerData) Draw(screen *ebiten.Image, entry *donburi.Entry) {
 		vector.StrokeLine(screen, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Max.X), float32(rect.Max.Y), 3, color.RGBA{255, 0, 0, 255}, true)
 		vector.StrokeLine(screen, float32(rect.Max.X), float32(rect.Min.Y), float32(rect.Min.X), float32(rect.Max.Y), 3, color.RGBA{255, 0, 0, 255}, true)
 	}
-	// draw score
-	str := fmt.Sprintf("SCORE %04d", p.score)
-	op := &text.DrawOptions{}
-	x, _ := text.Measure(str, ScoreFace, op.LineSpacing)
-	op.GeoM.Translate(400-x/2, 5)
-	text.Draw(screen, str, ScoreFace, op)
-
 }

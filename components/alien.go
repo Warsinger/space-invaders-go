@@ -21,7 +21,7 @@ var Alien = donburi.NewComponentType[AlienData]()
 const xOffset = 60
 const xBorder = 10
 const yOffset = 60
-const yBorder = 40
+const yBorder = 60
 
 func NewAliens(w donburi.World, level, rows, columns int) error {
 	query := donburi.NewQuery(filter.Contains(Board))
@@ -51,7 +51,7 @@ func NewAlien(w donburi.World, b *BoardInfo, level, x, y int) error {
 	Position.SetValue(entry, PositionData{x: x, y: y})
 	Velocity.SetValue(entry, VelocityData{x: level, y: 10})
 	Render.SetValue(entry, RenderData{&SpriteData{image: GetImage("alien")}})
-	Alien.SetValue(entry, AlienData{xStart: x, xRange: 75, yStart: y, yRange: b.Height, scoreValue: 10})
+	Alien.SetValue(entry, AlienData{xStart: x, xRange: 75, yStart: y, yRange: b.Height, scoreValue: 10 + level*5})
 	return nil
 }
 

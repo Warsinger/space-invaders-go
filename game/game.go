@@ -2,7 +2,9 @@ package game
 
 import (
 	"fmt"
+	"os"
 	comp "space-invaders/components"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -13,10 +15,12 @@ import (
 )
 
 type GameInfo struct {
-	world    donburi.World
-	ecs      *ecslib.ECS
-	gameOver bool
-	level    int
+	world     donburi.World
+	ecs       *ecslib.ECS
+	gameOver  bool
+	level     int
+	score     int
+	highScore int
 }
 
 func NewGame() (*GameInfo, error) {
@@ -30,15 +34,44 @@ func NewGame() (*GameInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	highScore := LoadScores()
+
 	ebiten.SetWindowSize(int(board.Width), int(board.Height))
 	ebiten.SetWindowTitle("Space Invaders")
 
 	return &GameInfo{
-		world,
-		ecs,
-		false,
-		1,
+		world:     world,
+		ecs:       ecs,
+		level:     1,
+		highScore: highScore,
 	}, nil
+}
+
+const highScoreFile = "score/highscore.txt"
+
+func LoadScores() int {
+	var highScore int = 0
+	bytes, err := os.ReadFile(highScoreFile)
+	fmt.Printf("bytes %s\n", string(bytes))
+	fmt.Printf("read err %v %T\n", err, err)
+	// if err != nil {
+	highScore, err = strconv.Atoi(string(bytes))
+	fmt.Printf("hs: %d\n", highScore)
+	fmt.Printf("conv err %v\n", err)
+	//}
+	if err != nil {
+		fmt.Printf("final err %v\n", err)
+	}
+
+	return highScore
+}
+
+func (g *GameInfo) SaveScores() error {
+	str := strconv.Itoa(g.highScore)
+
+	err := os.WriteFile(highScoreFile, []byte(str), 0644)
+	return err
 }
 
 func (g *GameInfo) Init() error {
@@ -55,6 +88,8 @@ func (g *GameInfo) Init() error {
 
 func (g *GameInfo) Clear() error {
 	g.gameOver = false
+	g.score = 0
+	g.level = 1
 	query := donburi.NewQuery(filter.Or(
 		filter.Contains(comp.Bullet),
 		filter.Contains(comp.Player),
@@ -79,6 +114,7 @@ func (g *GameInfo) Update() error {
 		g.Init()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+		g.EndGame()
 		return ebiten.Termination
 	}
 
@@ -152,12 +188,17 @@ func (g *GameInfo) Update() error {
 
 			if aRect.Max.Y >= pRect.Min.Y {
 				player.Kill()
-				g.gameOver = true
+				g.EndGame()
 			}
 		})
 	}
 
 	return err
+}
+func (g *GameInfo) EndGame() {
+	comp.PlaySound("killed")
+	g.gameOver = true
+	g.SaveScores()
 }
 
 func (g *GameInfo) NewLevel() error {
@@ -181,14 +222,12 @@ func (g *GameInfo) DetectCollisions() error {
 			alien := comp.Alien.Get(ae)
 			aRect := alien.GetRect(ae)
 			if bRect.Overlaps(aRect) {
-				// increment score
-				pe := comp.Player.MustFirst(g.world)
-				player := comp.Player.Get(pe)
-				player.AddScore(alien.GetScoreValue())
+				g.AddScore(alien.GetScoreValue())
 
 				// remove bullet and alien
 				g.world.Remove(ae.Entity())
 				g.world.Remove(be.Entity())
+				comp.PlaySound("explosion")
 			}
 		})
 	})
@@ -221,12 +260,28 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 		}
 	})
 
+	// draw level
 	str := fmt.Sprintf("LEVEL %02d", g.level)
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(5, 5)
 	text.Draw(screen, str, comp.ScoreFace, op)
 
+	// draw score
+	str = fmt.Sprintf("SCORE %05d", g.score)
+	op = &text.DrawOptions{}
+	x, y := text.Measure(str, comp.ScoreFace, op.LineSpacing)
+	op.GeoM.Translate(400-x/2, 5+y)
+	text.Draw(screen, str, comp.ScoreFace, op)
+
+	// draw high score
+	str = fmt.Sprintf("HIGH %05d", g.highScore)
+	op = &text.DrawOptions{}
+	x, _ = text.Measure(str, comp.ScoreFace, op.LineSpacing)
+	op.GeoM.Translate(795-x, 5)
+	text.Draw(screen, str, comp.ScoreFace, op)
+
 	if g.gameOver {
+		// draw game over
 		str := "GAME OVER"
 		op := &text.DrawOptions{}
 		x, y := text.Measure(str, comp.ScoreFace, op.LineSpacing)
@@ -237,4 +292,15 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 
 func (g *GameInfo) Layout(width, height int) (int, int) {
 	return width, height
+}
+
+func (g *GameInfo) AddScore(score int) {
+	g.score += score
+	if g.score > g.highScore {
+		g.highScore = g.score
+	}
+}
+
+func (g *GameInfo) GetScore() int {
+	return g.score
 }

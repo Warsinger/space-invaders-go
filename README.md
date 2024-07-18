@@ -28,9 +28,9 @@ Space Invaders in Go using an [Donburi ECS](https://github.com/yohamta/donburi/)
 
 ## Images
 ### Player
-![Player](assets/ship.png)
+![Player](assets/images/ship.png)
 ### Alien
-![Alien](assets/alien.png)
+![Alien](assets/images/alien.png)
 
 ### Gameplay
 Early development 
