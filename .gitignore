@@ -1,2 +1,6 @@
 .DS_Store
 score/
+.idea/
+wasm_exec.js
+*.wasm
+space-invaders

@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"os"
+	assets "space-invaders/assets"
 	comp "space-invaders/components"
 	"strconv"
 
@@ -31,7 +32,7 @@ func NewGame() (*GameInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = comp.LoadAssets()
+	err = assets.LoadAssets()
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +202,7 @@ func (g *GameInfo) Update() error {
 	return err
 }
 func (g *GameInfo) EndGame() {
-	comp.PlaySound("killed")
+	assets.PlaySound("killed")
 	g.gameOver = true
 	g.SaveScores()
 }
@@ -240,7 +241,7 @@ func (g *GameInfo) DetectCollisions() error {
 				// remove bullet and alien
 				g.world.Remove(ae.Entity())
 				g.world.Remove(be.Entity())
-				comp.PlaySound("explosion")
+				assets.PlaySound("explosion")
 			}
 		})
 	})
@@ -251,7 +252,7 @@ func (g *GameInfo) DetectCollisions() error {
 func (g *GameInfo) Draw(screen *ebiten.Image) {
 	screen.Clear()
 
-	img := comp.GetImage("background")
+	img := assets.GetImage("background")
 	opts := &ebiten.DrawImageOptions{}
 	screen.DrawImage(img, opts)
 
@@ -277,36 +278,36 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 	str := fmt.Sprintf("LEVEL %02d", g.level)
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(5, 5)
-	text.Draw(screen, str, comp.ScoreFace, op)
+	text.Draw(screen, str, assets.ScoreFace, op)
 
 	// draw score
 	str = fmt.Sprintf("SCORE %05d", g.score)
 	op = &text.DrawOptions{}
-	x, y := text.Measure(str, comp.ScoreFace, op.LineSpacing)
+	x, y := text.Measure(str, assets.ScoreFace, op.LineSpacing)
 	op.GeoM.Translate(400-x/2, 5+y)
-	text.Draw(screen, str, comp.ScoreFace, op)
+	text.Draw(screen, str, assets.ScoreFace, op)
 
 	// draw high score
 	str = fmt.Sprintf("HIGH %05d", g.highScore)
 	op = &text.DrawOptions{}
-	x, _ = text.Measure(str, comp.ScoreFace, op.LineSpacing)
+	x, _ = text.Measure(str, assets.ScoreFace, op.LineSpacing)
 	op.GeoM.Translate(795-x, 5)
-	text.Draw(screen, str, comp.ScoreFace, op)
+	text.Draw(screen, str, assets.ScoreFace, op)
 
 	if g.gameOver {
 		// draw game over
 		str := "GAME OVER"
 		op := &text.DrawOptions{}
-		x, y := text.Measure(str, comp.ScoreFace, op.LineSpacing)
+		x, y := text.Measure(str, assets.ScoreFace, op.LineSpacing)
 		op.GeoM.Translate(400-x/2, 300-y/2)
-		text.Draw(screen, str, comp.ScoreFace, op)
+		text.Draw(screen, str, assets.ScoreFace, op)
 	} else if g.paused {
 		// draw paused
 		str := "PAUSED"
 		op := &text.DrawOptions{}
-		x, y := text.Measure(str, comp.ScoreFace, op.LineSpacing)
+		x, y := text.Measure(str, assets.ScoreFace, op.LineSpacing)
 		op.GeoM.Translate(400-x/2, 300-y/2)
-		text.Draw(screen, str, comp.ScoreFace, op)
+		text.Draw(screen, str, assets.ScoreFace, op)
 	}
 }
 

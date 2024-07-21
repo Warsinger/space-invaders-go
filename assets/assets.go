@@ -2,10 +2,9 @@ package components
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
-	"image"
 	"log"
-	"os"
 
 	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -13,19 +12,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio/wav"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	"github.com/yohamta/donburi"
 )
 
 var images map[string]*ebiten.Image = make(map[string]*ebiten.Image)
 var sounds map[string]*audio.Player = make(map[string]*audio.Player)
 
-type SpriteData struct {
-	image *ebiten.Image
-}
-
-type AudioData struct {
-	// sound * audio
-}
+//go:embed images sounds
+var fs embed.FS
 
 var ScoreFace *text.GoTextFace
 var audioContext *audio.Context
@@ -81,7 +74,12 @@ func loadImages() error {
 	return nil
 }
 
+const supportAudio = true
+
 func loadAudio() error {
+	if !supportAudio {
+		return nil
+	}
 	audioContext = audio.NewContext(44100)
 	err := loadAudioAsset("explosion")
 	if err != nil {
@@ -100,13 +98,13 @@ func loadAudio() error {
 }
 
 func loadAudioAsset(name string) error {
-	filepath := fmt.Sprintf("assets/sounds/%s.wav", name)
-	audioFile, err := os.Open(filepath)
+	filepath := fmt.Sprintf("sounds/%s.wav", name)
+	data, err := fs.ReadFile(filepath)
 	if err != nil {
 		return err
 	}
 
-	d, err := wav.DecodeWithoutResampling(audioFile)
+	d, err := wav.DecodeWithoutResampling(bytes.NewReader(data))
 	if err != nil {
 		return err
 	}
@@ -120,8 +118,13 @@ func loadAudioAsset(name string) error {
 }
 
 func loadImageAsset(name string) error {
-	filepath := fmt.Sprintf("assets/images/%s.png", name)
-	img, _, err := ebitenutil.NewImageFromFile(filepath)
+	filepath := fmt.Sprintf("images/%s.png", name)
+	data, err := fs.ReadFile(filepath)
+	if err != nil {
+		log.Fatalf("failed to read embedded image %v: %v", name, err)
+		return err
+	}
+	img, _, err := ebitenutil.NewImageFromReader(bytes.NewReader(data))
 	if err != nil {
 		log.Fatalf("failed to load image %v: %v", name, err)
 		return err
@@ -133,31 +136,12 @@ func loadImageAsset(name string) error {
 
 func PlaySound(name string) {
 	sound := sounds[name]
-	sound.Rewind()
-	sound.Play()
+	if sound != nil {
+		sound.Rewind()
+		sound.Play()
+	}
 }
 
 func GetImage(name string) *ebiten.Image {
 	return images[name]
-}
-
-func (s *SpriteData) Draw(screen *ebiten.Image, entry *donburi.Entry) {
-	pos := Position.Get(entry)
-	v := Velocity.Get(entry)
-	opts := &ebiten.DrawImageOptions{}
-
-	if v.x < 0 {
-		// this flips the image when it is going to the left
-		opts.GeoM.Translate(-float64(pos.x+s.image.Bounds().Dx()), float64(pos.y))
-		opts.GeoM.Scale(-1, 1)
-	} else {
-		opts.GeoM.Translate(float64(pos.x), float64(pos.y))
-	}
-	screen.DrawImage(s.image, opts)
-}
-
-func (s *SpriteData) GetRect(entry *donburi.Entry) image.Rectangle {
-	pos := Position.Get(entry)
-	rect := s.image.Bounds()
-	return rect.Add(image.Pt(pos.x, pos.y))
 }

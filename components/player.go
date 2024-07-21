@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/yohamta/donburi"
+	assets "space-invaders/assets"
 )
 
 type PlayerData struct {
@@ -25,7 +26,7 @@ func NewPlayer(w donburi.World) error {
 
 	Position.SetValue(entry, PositionData{x: board.Width / 2, y: board.Height - yBorderBottom})
 	Velocity.SetValue(entry, VelocityData{x: 5, y: 0})
-	Render.SetValue(entry, RenderData{&SpriteData{image: GetImage("ship")}})
+	Render.SetValue(entry, RenderData{&SpriteData{image: assets.GetImage("ship")}})
 	return nil
 }
 
@@ -85,7 +86,7 @@ func (p *PlayerData) Shoot(w donburi.World, entry *donburi.Entry) {
 	Render.SetValue(bEntry, RenderData{&BulletRenderData{color: color.RGBA{255, 215, 0, 255}}})
 	Bullet.SetValue(bEntry, BulletData{length: 10, width: 3})
 
-	PlaySound("shoot")
+	assets.PlaySound("shoot")
 }
 
 func (p *PlayerData) IsDead() bool {

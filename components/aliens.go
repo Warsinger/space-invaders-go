@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	assets "space-invaders/assets"
 
 	"github.com/yohamta/donburi"
 	"github.com/yohamta/donburi/filter"
@@ -56,7 +57,7 @@ func NewAlien(w donburi.World, b *BoardInfo, level, x, y, choose int) error {
 	Position.SetValue(entry, PositionData{x: x, y: y})
 	Velocity.SetValue(entry, VelocityData{x: level, y: 10})
 	name := fmt.Sprintf("alien%v", choose)
-	Render.SetValue(entry, RenderData{&SpriteData{image: GetImage(name)}})
+	Render.SetValue(entry, RenderData{&SpriteData{image: assets.GetImage(name)}})
 	Alien.SetValue(entry, AlienData{xStart: x, xRange: 75, yStart: y, yRange: b.Height, scoreValue: 10 + level*5})
 	return nil
 }
