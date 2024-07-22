@@ -3,9 +3,10 @@ package game
 import (
 	"fmt"
 	"os"
+	"strconv"
+
 	assets "space-invaders/assets"
 	comp "space-invaders/components"
-	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"

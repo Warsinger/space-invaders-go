@@ -4,11 +4,12 @@ import (
 	"image"
 	"image/color"
 
+	assets "space-invaders/assets"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/yohamta/donburi"
-	assets "space-invaders/assets"
 )
 
 type PlayerData struct {
