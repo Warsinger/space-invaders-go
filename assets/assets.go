@@ -42,7 +42,7 @@ func LoadAssets() error {
 	return nil
 }
 func loadFonts() error {
-	s, err := text.NewGoTextFaceSource(bytes.NewReader(fonts.ArcadeN_ttf))
+	s, err := text.NewGoTextFaceSource(bytes.NewReader(fonts.MPlus1pRegular_ttf))
 	if err != nil {
 		return err
 	}

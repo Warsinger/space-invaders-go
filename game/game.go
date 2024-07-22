@@ -81,6 +81,11 @@ func (g *GameInfo) Init() error {
 	if err != nil {
 		return err
 	}
+
+	err = comp.NewBarriers(g.world, g.level)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -91,11 +96,12 @@ func (g *GameInfo) Clear() error {
 	g.level = 1
 	query := donburi.NewQuery(filter.Or(
 		filter.Contains(comp.Bullet),
+		filter.Contains(comp.Barrier),
 		filter.Contains(comp.Player),
 		filter.Contains(comp.Alien),
 	))
 	query.Each(g.world, func(e *donburi.Entry) {
-		g.world.Remove(e.Entity())
+		e.Remove()
 	})
 	return nil
 }
@@ -209,40 +215,64 @@ func (g *GameInfo) EndGame() {
 
 func (g *GameInfo) NewLevel() error {
 	g.level++
-	g.RemoveBullets()
+	g.CleanBoard()
 	err := comp.NewAliens(g.world, g.level, 4, 12)
 	if err != nil {
 		return err
 	}
+
+	err = comp.NewBarriers(g.world, g.level)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (g *GameInfo) RemoveBullets() {
-	query := donburi.NewQuery(filter.Contains(comp.Bullet))
+func (g *GameInfo) CleanBoard() {
+	query := donburi.NewQuery(filter.Or(
+		filter.Contains(comp.Bullet),
+		filter.Contains(comp.Barrier),
+		filter.Contains(comp.Alien),
+	))
+
 	query.Each(g.world, func(be *donburi.Entry) {
-		g.world.Remove(be.Entity())
+		be.Remove()
 	})
 }
 
 func (g *GameInfo) DetectCollisions() error {
 	var err error = nil
 	query := donburi.NewQuery(filter.Contains(comp.Bullet))
-	query.Each(g.world, func(be *donburi.Entry) {
-		brd := comp.Render.Get(be)
-		bRect := brd.GetRect(be)
+	query.Each(g.world, func(bulletEntry *donburi.Entry) {
+		bulletRender := comp.Render.Get(bulletEntry)
+		bulletRect := bulletRender.GetRect(bulletEntry)
 
-		query := donburi.NewQuery(filter.Contains(comp.Alien))
-		query.Each(g.world, func(ae *donburi.Entry) {
-			alien := comp.Alien.Get(ae)
-			aRect := alien.GetRect(ae)
-			if bRect.Overlaps(aRect) {
-				g.AddScore(alien.GetScoreValue())
+		query := donburi.NewQuery(filter.Or(
+			filter.Contains(comp.Alien),
+			filter.Contains(comp.Barrier),
+		))
+		query.Each(g.world, func(e *donburi.Entry) {
+			if e.HasComponent(comp.Alien) {
+				alien := comp.Alien.Get(e)
+				alienRect := alien.GetRect(e)
+				if bulletRect.Overlaps(alienRect) {
+					g.AddScore(alien.GetScoreValue())
 
-				// remove bullet and alien
-				g.world.Remove(ae.Entity())
-				g.world.Remove(be.Entity())
-				assets.PlaySound("explosion")
+					// remove bullet and alien
+					e.Remove()
+					bulletEntry.Remove()
+					assets.PlaySound("explosion")
+				}
+			} else if e.HasComponent(comp.Barrier) {
+				barrier := comp.Barrier.Get(e)
+				barrierRect := barrier.GetRect(e)
+				if bulletRect.Overlaps(barrierRect) {
+					barrier.ProcessHit(e)
+					bulletEntry.Remove()
+				}
 			}
+
 		})
 	})
 
