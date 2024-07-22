@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"space-invaders/game"
 
@@ -8,8 +9,10 @@ import (
 )
 
 func main() {
+	level := flag.Int("level", 1, "Starting level")
+	flag.Parse()
 
-	g, err := game.NewGame()
+	g, err := game.NewGame(*level)
 	if err != nil {
 		log.Fatal(err)
 	}

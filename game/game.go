@@ -16,16 +16,17 @@ import (
 )
 
 type GameInfo struct {
-	world     donburi.World
-	ecs       *ecslib.ECS
-	gameOver  bool
-	paused    bool
-	level     int
-	score     int
-	highScore int
+	world         donburi.World
+	ecs           *ecslib.ECS
+	gameOver      bool
+	paused        bool
+	level         int
+	score         int
+	highScore     int
+	startingLevel int
 }
 
-func NewGame() (*GameInfo, error) {
+func NewGame(level int) (*GameInfo, error) {
 	world := donburi.NewWorld()
 	ecs := ecslib.NewECS(world)
 	board, err := comp.NewBoard(world)
@@ -43,10 +44,11 @@ func NewGame() (*GameInfo, error) {
 	ebiten.SetWindowTitle("Space Invaders")
 
 	return &GameInfo{
-		world:     world,
-		ecs:       ecs,
-		level:     1,
-		highScore: highScore,
+		world:         world,
+		ecs:           ecs,
+		level:         level,
+		highScore:     highScore,
+		startingLevel: level,
 	}, nil
 }
 
@@ -93,7 +95,7 @@ func (g *GameInfo) Clear() error {
 	g.gameOver = false
 	g.paused = false
 	g.score = 0
-	g.level = 1
+	g.level = g.startingLevel
 	query := donburi.NewQuery(filter.Or(
 		filter.Contains(comp.Bullet),
 		filter.Contains(comp.Barrier),

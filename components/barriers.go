@@ -1,7 +1,6 @@
 package components
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 
@@ -26,7 +25,6 @@ const maxBarriers = 6
 
 func NewBarriers(w donburi.World, level int) error {
 	count := min(level, maxBarriers)
-	fmt.Printf("barrier count %v\n", count)
 	be := Board.MustFirst(w)
 	board := Board.Get(be)
 

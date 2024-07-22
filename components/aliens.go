@@ -55,7 +55,7 @@ func NewAlien(w donburi.World, b *BoardInfo, level, x, y, choose int) error {
 	entity := w.Create(Alien, Position, Velocity, Render)
 	entry := w.Entry(entity)
 	Position.SetValue(entry, PositionData{x: x, y: y})
-	Velocity.SetValue(entry, VelocityData{x: level, y: 10})
+	Velocity.SetValue(entry, VelocityData{x: level/3 + 1, y: 10})
 	name := fmt.Sprintf("alien%v", choose)
 	Render.SetValue(entry, RenderData{&SpriteData{image: assets.GetImage(name)}})
 	Alien.SetValue(entry, AlienData{xStart: x, xRange: 75, yStart: y, yRange: b.Height, scoreValue: 10 + level*5})
