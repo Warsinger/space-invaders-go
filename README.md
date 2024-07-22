@@ -10,7 +10,7 @@ Space Invaders in Go using an [Donburi ECS](https://github.com/yohamta/donburi/)
 
 ## TODO
 * Different aliens
-* Aliens shoot
+* ~~Aliens shoot~~
 * ~~Vertical orientation~~
 * ~~Destructible Barriers~~
 * ~~Pause game~~

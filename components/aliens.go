@@ -3,7 +3,9 @@ package components
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"log"
+	"math/rand"
 
 	assets "space-invaders/assets"
 
@@ -76,11 +78,26 @@ func (a *AlienData) Update(entry *donburi.Entry) error {
 		}
 		v.x = -v.x
 		pos.y += v.y
-		if pos.y > a.yRange {
-			pos.y = a.yStart // TODO this should kill the player
-		}
+	}
+
+	if rand.Intn(10000) > 9996 {
+		a.Shoot(entry)
 	}
 	return nil
+}
+
+func (a *AlienData) Shoot(entry *donburi.Entry) {
+	pos := Position.Get(entry)
+	entity := entry.World.Create(Bullet, Position, Velocity, Render)
+	bEntry := entry.World.Entry(entity)
+	Position.SetValue(bEntry, PositionData{x: pos.x + 24, y: pos.y + 48})
+
+	// TODO change direction of x velocity
+	Velocity.SetValue(bEntry, VelocityData{x: rand.Intn(3), y: 3})
+	Render.SetValue(bEntry, RenderData{&BulletRenderData{color: color.RGBA{255, 10, 10, 255}}})
+	Bullet.SetValue(bEntry, BulletData{length: 16, width: 4, alien: true})
+
+	assets.PlaySound("shoot") // TODO make a different sound for alien bullets
 }
 
 func (a *AlienData) GetRect(entry *donburi.Entry) image.Rectangle {

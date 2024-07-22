@@ -252,13 +252,22 @@ func (g *GameInfo) DetectCollisions() error {
 	query.Each(g.world, func(bulletEntry *donburi.Entry) {
 		bulletRender := comp.Render.Get(bulletEntry)
 		bulletRect := bulletRender.GetRect(bulletEntry)
+		bullet := comp.Bullet.Get(bulletEntry)
 
 		query := donburi.NewQuery(filter.Or(
 			filter.Contains(comp.Alien),
 			filter.Contains(comp.Barrier),
 		))
 		query.Each(g.world, func(e *donburi.Entry) {
-			if e.HasComponent(comp.Alien) {
+			if bullet.IsAlien() {
+				pe := comp.Player.MustFirst(g.world)
+				player := comp.Player.Get(pe)
+				playerRect := player.GetRect(pe)
+				if bulletRect.Overlaps(playerRect) {
+					player.Kill()
+					g.EndGame()
+				}
+			} else if e.HasComponent(comp.Alien) {
 				alien := comp.Alien.Get(e)
 				alienRect := alien.GetRect(e)
 				if bulletRect.Overlaps(alienRect) {
@@ -269,7 +278,8 @@ func (g *GameInfo) DetectCollisions() error {
 					bulletEntry.Remove()
 					assets.PlaySound("explosion")
 				}
-			} else if e.HasComponent(comp.Barrier) {
+			}
+			if e.HasComponent(comp.Barrier) {
 				barrier := comp.Barrier.Get(e)
 				barrierRect := barrier.GetRect(e)
 				if bulletRect.Overlaps(barrierRect) {

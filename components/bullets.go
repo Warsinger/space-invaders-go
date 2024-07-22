@@ -11,6 +11,7 @@ import (
 
 type BulletData struct {
 	length, width int
+	alien         bool
 }
 
 var Bullet = donburi.NewComponentType[BulletData]()
@@ -44,4 +45,8 @@ func (brd *BulletRenderData) GetRect(entry *donburi.Entry) image.Rectangle {
 	pos := Position.Get(entry)
 	b := Bullet.Get(entry)
 	return image.Rect(pos.x, pos.y, pos.x+b.width, pos.y+b.length)
+}
+
+func (b *BulletData) IsAlien() bool {
+	return b.alien
 }

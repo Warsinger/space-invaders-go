@@ -50,7 +50,7 @@ func (p *PlayerData) Update(w donburi.World, entry *donburi.Entry) error {
 		p.Move(Left, entry)
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-		p.Shoot(w, entry)
+		p.Shoot(entry)
 	}
 	return nil
 }
@@ -75,17 +75,17 @@ func (p *PlayerData) Move(dir Direction, entry *donburi.Entry) {
 	}
 }
 
-func (p *PlayerData) Shoot(w donburi.World, entry *donburi.Entry) {
+func (p *PlayerData) Shoot(entry *donburi.Entry) {
 	if p.dead {
 		return
 	}
 	pos := Position.Get(entry)
-	entity := w.Create(Bullet, Position, Velocity, Render)
-	bEntry := w.Entry(entity)
+	entity := entry.World.Create(Bullet, Position, Velocity, Render)
+	bEntry := entry.World.Entry(entity)
 	Position.SetValue(bEntry, PositionData{x: pos.x + 24, y: pos.y - 10})
 	Velocity.SetValue(bEntry, VelocityData{x: 0, y: -3})
 	Render.SetValue(bEntry, RenderData{&BulletRenderData{color: color.RGBA{255, 215, 0, 255}}})
-	Bullet.SetValue(bEntry, BulletData{length: 10, width: 3})
+	Bullet.SetValue(bEntry, BulletData{length: 16, width: 4})
 
 	assets.PlaySound("shoot")
 }
