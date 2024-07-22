@@ -79,7 +79,7 @@ func (g *GameInfo) Init() error {
 	if err != nil {
 		return err
 	}
-	err = comp.NewAliens(g.world, g.level, 4, 12)
+	err = g.NewAliens()
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func (g *GameInfo) EndGame() {
 func (g *GameInfo) NewLevel() error {
 	g.level++
 	g.CleanBoard()
-	err := comp.NewAliens(g.world, g.level, 4, 12)
+	err := g.NewAliens()
 	if err != nil {
 		return err
 	}
@@ -230,7 +230,9 @@ func (g *GameInfo) NewLevel() error {
 
 	return nil
 }
-
+func (g *GameInfo) NewAliens() error {
+	return comp.NewAliens(g.world, g.level, 4, 8)
+}
 func (g *GameInfo) CleanBoard() {
 	query := donburi.NewQuery(filter.Or(
 		filter.Contains(comp.Bullet),
@@ -284,7 +286,7 @@ func (g *GameInfo) DetectCollisions() error {
 func (g *GameInfo) Draw(screen *ebiten.Image) {
 	screen.Clear()
 
-	img := assets.GetImage("background")
+	img := assets.GetImage("backgroundV")
 	opts := &ebiten.DrawImageOptions{}
 	screen.DrawImage(img, opts)
 
@@ -306,24 +308,28 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 		}
 	})
 
+	const textBorder float64 = 5
 	// draw level
 	str := fmt.Sprintf("LEVEL %02d", g.level)
 	op := &text.DrawOptions{}
-	op.GeoM.Translate(5, 5)
+	op.GeoM.Translate(textBorder, textBorder)
 	text.Draw(screen, str, assets.ScoreFace, op)
 
+	be := comp.Board.MustFirst(g.world)
+	board := comp.Board.Get(be)
+	halfWidth, halfHeight := float64(board.Width/2), float64(board.Height/2)
 	// draw score
 	str = fmt.Sprintf("SCORE %05d", g.score)
 	op = &text.DrawOptions{}
 	x, y := text.Measure(str, assets.ScoreFace, op.LineSpacing)
-	op.GeoM.Translate(400-x/2, 5+y)
+	op.GeoM.Translate(halfWidth-x/2, textBorder+y)
 	text.Draw(screen, str, assets.ScoreFace, op)
 
 	// draw high score
 	str = fmt.Sprintf("HIGH %05d", g.highScore)
 	op = &text.DrawOptions{}
 	x, _ = text.Measure(str, assets.ScoreFace, op.LineSpacing)
-	op.GeoM.Translate(795-x, 5)
+	op.GeoM.Translate(float64(board.Width)-x-textBorder, textBorder)
 	text.Draw(screen, str, assets.ScoreFace, op)
 
 	if g.gameOver {
@@ -331,14 +337,14 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 		str := "GAME OVER"
 		op := &text.DrawOptions{}
 		x, y := text.Measure(str, assets.ScoreFace, op.LineSpacing)
-		op.GeoM.Translate(400-x/2, 300-y/2)
+		op.GeoM.Translate(halfWidth-x/2, halfHeight-y/2)
 		text.Draw(screen, str, assets.ScoreFace, op)
 	} else if g.paused {
 		// draw paused
 		str := "PAUSED"
 		op := &text.DrawOptions{}
 		x, y := text.Measure(str, assets.ScoreFace, op.LineSpacing)
-		op.GeoM.Translate(400-x/2, 300-y/2)
+		op.GeoM.Translate(halfWidth-x/2, halfHeight-y/2)
 		text.Draw(screen, str, assets.ScoreFace, op)
 	}
 }

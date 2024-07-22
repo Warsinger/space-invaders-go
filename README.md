@@ -9,11 +9,12 @@ Space Invaders in Go using an [Donburi ECS](https://github.com/yohamta/donburi/)
 * Q to quit
 
 ## TODO
-* Destructible Barriers
 * Different aliens
 * Aliens shoot
+* ~~Vertical orientation~~
+* ~~Destructible Barriers~~
 * ~~Pause game~~
-* Stretch: Webassembly for Browser
+* ~~Stretch: Webassembly for Browser~~
 * ~~use https://github.com/yohamta/donburi/ to create a game~~
 * ~~Fire bullets~~
 * ~~Define board size, borders, kill zone~~

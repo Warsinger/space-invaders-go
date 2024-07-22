@@ -22,9 +22,10 @@ type BarrierRenderData struct {
 var Barrier = donburi.NewComponentType[BarrierData]()
 
 const maxBarriers = 6
+const minBarriers = 2
 
 func NewBarriers(w donburi.World, level int) error {
-	count := min(level, maxBarriers)
+	count := max(minBarriers, (level-1)%maxBarriers+1)
 	be := Board.MustFirst(w)
 	board := Board.Get(be)
 

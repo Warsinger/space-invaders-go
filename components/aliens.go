@@ -22,7 +22,7 @@ var Alien = donburi.NewComponentType[AlienData]()
 
 const (
 	xOffset       = 60
-	xBorder       = 10
+	xBorder       = 25
 	yOffset       = 60
 	yBorderTop    = 60
 	yBorderBottom = 45

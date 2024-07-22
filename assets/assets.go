@@ -55,43 +55,24 @@ func loadFonts() error {
 }
 
 func loadImages() error {
-	err := loadImageAsset("alien1")
-	if err != nil {
-		return err
-	}
-	err = loadImageAsset("alien2")
-	if err != nil {
-		return err
-	}
-	err = loadImageAsset("ship")
-	if err != nil {
-		return err
-	}
-	err = loadImageAsset("background")
-	if err != nil {
-		return err
+	names := []string{"alien1", "alien2", "ship", "backgroundH", "backgroundV"}
+	for _, name := range names {
+		err := loadImageAsset(name)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-const supportAudio = true
-
 func loadAudio() error {
-	if !supportAudio {
-		return nil
-	}
 	audioContext = audio.NewContext(44100)
-	err := loadAudioAsset("explosion")
-	if err != nil {
-		return err
-	}
-	err = loadAudioAsset("killed")
-	if err != nil {
-		return err
-	}
-	err = loadAudioAsset("shoot")
-	if err != nil {
-		return err
+	names := []string{"explosion", "killed", "shoot"}
+	for _, name := range names {
+		err := loadAudioAsset(name)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
