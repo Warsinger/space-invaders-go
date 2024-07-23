@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	assets "space-invaders/assets"
+	"space-invaders/assets"
 	comp "space-invaders/components"
 
 	"github.com/hajimehoshi/ebiten/v2"

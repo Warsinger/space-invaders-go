@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	assets "space-invaders/assets"
+	"space-invaders/assets"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"

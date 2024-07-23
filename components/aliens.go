@@ -7,7 +7,7 @@ import (
 	"log"
 	"math/rand"
 
-	assets "space-invaders/assets"
+	"space-invaders/assets"
 
 	"github.com/yohamta/donburi"
 	"github.com/yohamta/donburi/filter"
