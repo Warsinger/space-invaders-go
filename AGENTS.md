@@ -5,7 +5,7 @@
 - Assign every issue/PR to `Warsinger`; request `Warsinger` review on new PRs. Use appropriate documentation, testing, dependencies, platform and build labels. Apply priority only when the owner sets it.
 - Discuss gameplay changes before implementing them. Record agreed scope/design in the issue. Preserve existing controls and balance unless a fix is required and documented.
 - Run meaningful checks and inspect CI results. Never merge without user authorization.
-- Cloudflare provisioning and publishing are deferred under issue #4. Do not create a project or upload/deploy until the owner confirms the project name/hostname and authorizes publishing.
+- Cloudflare uses the owner-provisioned `alien-invaders` Direct Upload project (`alien-invaders.pages.dev`). Publish main only after successful CI; previews require explicit manual dispatch for a current same-repository PR. Do not create projects or change accounts/targets without owner authorization.
 
 # GitHub identity
 

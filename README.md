@@ -21,8 +21,8 @@ graphics/audio libraries and display described in CI; headless checks use Xvfb.
 
 Run `go run ./cmd/web -serve` and open http://localhost:8080. The game loads
 automatically with keyboard focus; audio requires interaction. High scores persist in this browser
-with a session fallback when storage is blocked. Cloudflare publishing is deferred
-until the owner provisions the project; CI only builds downloadable artifacts.
+with a session fallback when storage is blocked. Cloudflare publishing uses the
+owner-provisioned `alien-invaders.pages.dev` project; see the deployment guide.
 
 ## Controls
 
