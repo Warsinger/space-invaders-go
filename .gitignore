@@ -4,3 +4,8 @@ score/
 wasm_exec.js
 *.wasm
 space-invaders
+space-invaders.exe
+build/
+coverage.out
+coverage-summary.txt
+coverage.html

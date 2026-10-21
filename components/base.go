@@ -29,6 +29,9 @@ type RenderData struct {
 	renderer Renderer
 }
 
+// NewRenderData wraps a renderer, including bounds-only renderers for rule tests.
+func NewRenderData(renderer Renderer) RenderData { return RenderData{renderer: renderer} }
+
 var Render = donburi.NewComponentType[RenderData]()
 
 func (r *RenderData) Draw(screen *ebiten.Image, entry *donburi.Entry) {
