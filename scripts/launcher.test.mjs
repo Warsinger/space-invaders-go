@@ -6,8 +6,10 @@ import vm from 'node:vm';
 test('automatic playfield reports ready and errors without needing a launch button', () => {
   let listener;
   let focused = 0;
+  let canvasFocused = 0;
+  const canvas = { tabIndex: -1, focus: () => canvasFocused++ };
   const status = { dataset: {}, textContent: 'Loading game…' };
-  const frame = { contentWindow: {}, focus: () => focused++ };
+  const frame = { contentWindow: {}, focus: () => focused++, contentDocument: { querySelector: selector => { assert.equal(selector, 'canvas'); return canvas; } } };
   const nodes = { game: frame, status };
   const origin = 'https://game.example';
   vm.runInNewContext(fs.readFileSync(new URL('../web/launcher.js', import.meta.url), 'utf8'), {
@@ -18,9 +20,12 @@ test('automatic playfield reports ready and errors without needing a launch butt
   message('game-ready', {});
   message('game-ready', frame.contentWindow, 'https://other.example');
   assert.equal(status.textContent, 'Loading game…');
+  assert.equal(canvasFocused, 0);
   message('game-ready');
   assert.match(status.textContent, /Game ready/);
   assert.equal(focused, 1);
+  assert.equal(canvasFocused, 1);
+  assert.equal(canvas.tabIndex, 0);
   message('game-error');
   assert.equal(status.dataset.error, 'true');
   assert.match(status.textContent, /Reload to retry.*<download failed>/);

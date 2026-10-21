@@ -20,7 +20,7 @@ graphics/audio libraries and display described in CI; headless checks use Xvfb.
 ## Browser
 
 Run `go run ./cmd/web -serve` and open http://localhost:8080. The game loads
-automatically. Click inside for input/audio; high scores persist in this browser
+automatically with keyboard focus; audio requires interaction. High scores persist in this browser
 with a session fallback when storage is blocked. Cloudflare publishing is deferred
 until the owner provisions the project; CI only builds downloadable artifacts.
 

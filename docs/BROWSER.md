@@ -10,7 +10,8 @@ cross-compilation environment variables need to be set. The old root HTML and
 wasmpackage.sh prototype are replaced by this portable command.
 
 The game loads automatically, with instructions and the shared project footer
-below it. Click inside to focus and unlock browser audio. Left/Right move,
+below it. Keyboard focus moves to the game canvas once it is ready. Click inside
+if focus is lost; sound still requires browser interaction. Left/Right move,
 Space fires, P pauses and R restarts. Q is native-only. Space/arrows do not scroll
 while gameplay has focus. The 600×800 logical board scales with its frame.
 

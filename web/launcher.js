@@ -5,8 +5,14 @@ window.addEventListener("message", (event) => {
   const status = document.getElementById("status");
   if (!frame || !status || event.origin !== location.origin || event.source !== frame.contentWindow) return;
   if (event.data?.type === "game-ready" && !status.dataset.error) {
-    status.textContent = "Game ready. Click inside to play. Arrows move; Space fires.";
+    status.textContent = "Game ready. Arrows move; Space fires. Click inside if keyboard focus is lost.";
     frame.focus({preventScroll: true});
+    // Focusing the iframe alone does not focus Ebitengine's input canvas.
+    const canvas = frame.contentDocument?.querySelector("canvas");
+    if (canvas) {
+      canvas.tabIndex = 0;
+      canvas.focus({preventScroll: true});
+    }
   }
   if (event.data?.type === "game-error") {
     status.dataset.error = "true";
