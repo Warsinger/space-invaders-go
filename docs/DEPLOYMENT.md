@@ -11,10 +11,9 @@ and hostname. It never creates projects or changes account settings.
 Pushes to main publish automatically after all native tests/vet/coverage/builds
 and browser checks succeed. Deployment jobs are serialized and a superseded
 main revision is rejected. The downloaded artifact's version.json must match
-the workflow SHA. Cloudflare’s official `cloudflare/wrangler-action@v4` installs and runs
-Wrangler; our scripts validate before uploading and revalidate before reporting.
-Wrangler is pinned to 4.151.1, matching the tested Tower
-Defense deployment tooling. Review pinned tool updates as ordinary changes.
+the workflow SHA. Cloudflare's official `wrangler-action@v4` handles upload,
+linked summaries and GitHub deployments, with Wrangler pinned to 4.151.1.
+Project/artifact checks and preview comments remain candidates for later reuse.
 
 For a preview, manually dispatch **Go build** on the open PR branch with `deploy`
 enabled and `preview_pr` set to its number. Only the current head of an open,
@@ -23,7 +22,7 @@ and do not receive deployment secrets. The URL is
 `https://pr-N.alien-invaders.pages.dev/`; production is
 `https://alien-invaders.pages.dev/`. Manual dispatch without deploy only builds.
 
-The deployment writes a clickable link and SHA to the job summary. A preview
+The action writes deployment links and the commit to the job summary. A preview
 also creates or updates one github-actions[bot] PR comment with the preview and
 build links. Production publication does not add a PR preview comment.
 
@@ -53,12 +52,3 @@ production rollback and roll-forward path with publishing idle. Preview
 deployments are not production rollback targets; the next main deployment can
 supersede a rollback. High scores belong to each site origin and are not copied
 between previews and production.
-
-## Remaining shared scaffolding
-
-The repository still owns target/project validation, artifact revision checks,
-manual preview policy, concurrency, and the updateable PR comment and linked
-summary. These are candidates for a later shared repository; app builds, tests
-and Pages packaging remain app-specific. The official action owns Wrangler
-installation and upload. Deployment URLs come from its Pages outputs and are
-checked against the expected hostname before being reported.
