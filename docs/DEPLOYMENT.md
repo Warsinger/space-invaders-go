@@ -1,10 +1,33 @@
-# Cloudflare preparation — publishing deferred
+# Cloudflare Pages deployment
 
-The static artifact is ready for later deployment, but CI intentionally has no
-deployment job and this work does not create a Cloudflare project, upload code,
-or publish a site. Follow issue #4 after the owner provisions the application.
+The owner has provisioned the free Direct Upload project `alien-invaders`, with
+production branch `main` and hostname `alien-invaders.pages.dev`, and installed
+repository Actions secrets `CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_API_TOKEN`.
+The workflow validates that exact project, production branch, Direct Upload mode
+and hostname. It never creates projects or changes account settings.
 
-Owner setup checklist:
+## Publish and preview
+
+Pushes to main publish automatically after all native tests/vet/coverage/builds
+and browser checks succeed. Deployment jobs are serialized and a superseded
+main revision is rejected. The downloaded artifact's version.json must match
+the workflow SHA. Wrangler is pinned to 4.151.1, matching the tested Tower
+Defense deployment tooling. Review pinned tool updates as ordinary changes.
+
+For a preview, manually dispatch **Go build** on the open PR branch with `deploy`
+enabled and `preview_pr` set to its number. Only the current head of an open,
+same-repository PR targeting main can publish. Ordinary PR events cannot deploy
+and do not receive deployment secrets. The URL is
+`https://pr-N.alien-invaders.pages.dev/`; production is
+`https://alien-invaders.pages.dev/`. Manual dispatch without deploy only builds.
+
+The deployment writes a clickable link and SHA to the job summary. A preview
+also creates or updates one github-actions[bot] PR comment with the preview and
+build links. Production publication does not add a PR preview comment.
+
+## Setup and verification
+
+For future credential rotation/project recovery:
 
 1. Create a free Pages Direct Upload project with production branch `main`.
 2. Confirm the actual project name and assigned pages.dev hostname. Do not assume
@@ -12,15 +35,12 @@ Owner setup checklist:
 3. Add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` as repository Actions
    secrets. The token needs Pages edit access for the intended account; other
    repositories' secret values cannot be copied/read by the builder.
-4. Authorize deployment. Add a pinned Wrangler deployment job with target/name/
-   hostname and revision validation, serialized publication, main publishing
-   after successful tests/builds, and explicitly requested same-repository PR
-   previews. Post preview links in a bot-owned PR comment and build summary,
-   following Tower Defense's approach. Do not enable triggers before this step.
+4. Use the existing publishing workflow. A changed account/project/hostname
+   requires a reviewed configuration change; a missing project fails closed.
 5. Test the preview and production origin: gameplay, sound after interaction,
    score persistence, version.json, missing assets and cache behavior.
 
-Current preparation: CI uploads `space-invaders-web` containing `build/pages`.
+CI uploads `space-invaders-web` containing `build/pages`.
 `version.json` records the revision and content-addressed asset directory.
 Old/new runtime, JavaScript and Wasm must stay in the same release directory;
 do not mix files between builds. No Cloudflare CLI/login/secret is needed to

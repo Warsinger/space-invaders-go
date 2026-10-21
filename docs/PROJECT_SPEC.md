@@ -35,7 +35,8 @@ The browser uses the same gameplay/assets in a fixed logical board scaled by the
 frame. The website loads automatically with loading/error feedback, instructions
 and the shared project footer. Sound requires browser interaction. Keyboard and
 desktop browsers are the initial target; touch controls, multiplayer and PWA
-installation are not implemented. Cloudflare publishing is deferred under #4.
+installation are not implemented. Cloudflare publishing uses the owner-provisioned
+alien-invaders.pages.dev project; see DEPLOYMENT.md.
 
 Architecture: `game` owns lifecycle, collisions, scoring and overlays;
 `components` owns movement, bullets, barriers and sprite renderers; `assets`
