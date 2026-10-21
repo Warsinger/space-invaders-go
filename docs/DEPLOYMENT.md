@@ -11,8 +11,13 @@ and hostname. It never creates projects or changes account settings.
 Pushes to main publish automatically after all native tests/vet/coverage/builds
 and browser checks succeed. Deployment jobs are serialized and a superseded
 main revision is rejected. The downloaded artifact's version.json must match
-the workflow SHA. Wrangler is pinned to 4.151.1, matching the tested Tower
-Defense deployment tooling. Review pinned tool updates as ordinary changes.
+the workflow SHA. Publishing, project validation, preview comments and their tests
+live in [cloudflare-pages-deploy](https://github.com/Warsinger/cloudflare-pages-deploy).
+This repository retains its build/package checks and a small workflow caller.
+Both the reusable workflow and its script checkout are pinned to the same full
+shared commit; update both references together after reviewing shared changes.
+The shared workflow wraps Cloudflare's official Wrangler action, pinned with
+Wrangler 4.151.1, and receives only the explicit repository secrets below.
 
 For a preview, manually dispatch **Go build** on the open PR branch with `deploy`
 enabled and `preview_pr` set to its number. Only the current head of an open,
@@ -21,7 +26,7 @@ and do not receive deployment secrets. The URL is
 `https://pr-N.alien-invaders.pages.dev/`; production is
 `https://alien-invaders.pages.dev/`. Manual dispatch without deploy only builds.
 
-The deployment writes a clickable link and SHA to the job summary. A preview
+The action writes deployment links and the commit to the job summary. A preview
 also creates or updates one github-actions[bot] PR comment with the preview and
 build links. Production publication does not add a PR preview comment.
 
