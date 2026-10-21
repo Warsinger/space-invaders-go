@@ -2,11 +2,11 @@ package game
 
 import (
 	"fmt"
-	"os"
-	"strconv"
 
 	"space-invaders/assets"
 	comp "space-invaders/components"
+	"space-invaders/platform"
+	score "space-invaders/scores"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -25,9 +25,11 @@ type GameInfo struct {
 	score         int
 	highScore     int
 	startingLevel int
+	ready         bool
 }
 
 func NewGame(level int) (*GameInfo, error) {
+	level = max(1, level)
 	world := donburi.NewWorld()
 	ecs := ecslib.NewECS(world)
 	board, err := comp.NewBoard(world)
@@ -53,26 +55,12 @@ func NewGame(level int) (*GameInfo, error) {
 	}, nil
 }
 
-const highScoreFile = "score/highscore.txt"
-
 func LoadScores() int {
-	var highScore int = 0
-	bytes, err := os.ReadFile(highScoreFile)
-	if err == nil {
-		highScore, err = strconv.Atoi(string(bytes))
-		if err != nil {
-			fmt.Printf("WARN high score formatting err %v\n", err)
-		}
-	}
-
-	return highScore
+	return score.Load()
 }
 
 func (g *GameInfo) SaveScores() error {
-	str := strconv.Itoa(g.highScore)
-
-	err := os.WriteFile(highScoreFile, []byte(str), 0644)
-	return err
+	return score.Save(g.highScore)
 }
 
 func (g *GameInfo) Init() error {
@@ -118,10 +106,17 @@ func (g *GameInfo) GetECS() *ecslib.ECS {
 
 func (g *GameInfo) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		g.Clear()
-		g.Init()
+		if err := g.SaveScores(); err != nil {
+			fmt.Printf("WARN save high score: %v\n", err)
+		}
+		if err := g.Clear(); err != nil {
+			return err
+		}
+		if err := g.Init(); err != nil {
+			return err
+		}
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+	if !platform.Browser && inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		g.EndGame()
 		return ebiten.Termination
 	}
@@ -152,6 +147,9 @@ func (g *GameInfo) Update() error {
 	var err error = nil
 	// update all entities
 	query.Each(g.world, func(entry *donburi.Entry) {
+		if err != nil {
+			return
+		}
 		if entry.HasComponent(comp.Player) {
 			player := comp.Player.Get(entry)
 			err = player.Update(g.world, entry)
@@ -177,6 +175,9 @@ func (g *GameInfo) Update() error {
 			}
 		}
 	})
+	if err != nil {
+		return err
+	}
 	// after updating all positions check for collisions
 	// get all the bullets, for each bullet loop through all the aliens (or other objects) and see if there are collisions
 	// if there is a collition, remove both objects (or subtract from their health)
@@ -211,9 +212,14 @@ func (g *GameInfo) Update() error {
 	return err
 }
 func (g *GameInfo) EndGame() {
+	if g.gameOver {
+		return
+	}
 	assets.PlaySound("killed")
 	g.gameOver = true
-	g.SaveScores()
+	if err := g.SaveScores(); err != nil {
+		fmt.Printf("WARN save high score: %v\n", err)
+	}
 }
 
 func (g *GameInfo) NewLevel() error {
@@ -253,21 +259,27 @@ func (g *GameInfo) DetectCollisions() error {
 		bulletRender := comp.Render.Get(bulletEntry)
 		bulletRect := bulletRender.GetRect(bulletEntry)
 		bullet := comp.Bullet.Get(bulletEntry)
+		if bullet.IsAlien() {
+			pe := comp.Player.MustFirst(g.world)
+			player := comp.Player.Get(pe)
+			if !player.IsDead() && bulletRect.Overlaps(player.GetRect(pe)) {
+				player.Kill()
+				bulletEntry.Remove()
+				g.EndGame()
+				return
+			}
+		}
+		hit := false
 
 		query := donburi.NewQuery(filter.Or(
 			filter.Contains(comp.Alien),
 			filter.Contains(comp.Barrier),
 		))
 		query.Each(g.world, func(e *donburi.Entry) {
-			if bullet.IsAlien() {
-				pe := comp.Player.MustFirst(g.world)
-				player := comp.Player.Get(pe)
-				playerRect := player.GetRect(pe)
-				if bulletRect.Overlaps(playerRect) {
-					player.Kill()
-					g.EndGame()
-				}
-			} else if e.HasComponent(comp.Alien) {
+			if hit {
+				return
+			}
+			if !bullet.IsAlien() && e.HasComponent(comp.Alien) {
 				alien := comp.Alien.Get(e)
 				alienRect := alien.GetRect(e)
 				if bulletRect.Overlaps(alienRect) {
@@ -276,7 +288,9 @@ func (g *GameInfo) DetectCollisions() error {
 					// remove bullet and alien
 					e.Remove()
 					bulletEntry.Remove()
+					hit = true
 					assets.PlaySound("explosion")
+					return
 				}
 			}
 			if e.HasComponent(comp.Barrier) {
@@ -285,6 +299,7 @@ func (g *GameInfo) DetectCollisions() error {
 				if bulletRect.Overlaps(barrierRect) {
 					barrier.ProcessHit(e)
 					bulletEntry.Remove()
+					hit = true
 				}
 			}
 
@@ -295,6 +310,10 @@ func (g *GameInfo) DetectCollisions() error {
 }
 
 func (g *GameInfo) Draw(screen *ebiten.Image) {
+	if !g.ready {
+		platform.Ready()
+		g.ready = true
+	}
 	screen.Clear()
 
 	img := assets.GetImage("backgroundV")
@@ -361,6 +380,9 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 }
 
 func (g *GameInfo) Layout(width, height int) (int, int) {
+	if platform.Browser {
+		return 600, 800
+	}
 	return width, height
 }
 
@@ -368,6 +390,9 @@ func (g *GameInfo) AddScore(score int) {
 	g.score += score
 	if g.score > g.highScore {
 		g.highScore = g.score
+		if err := g.SaveScores(); err != nil {
+			fmt.Printf("WARN save high score: %v\n", err)
+		}
 	}
 }
 

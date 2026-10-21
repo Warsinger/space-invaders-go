@@ -1,0 +1,59 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { gunzipSync } from 'node:zlib';
+import { packagePages } from './package-pages.mjs';
+
+test('real HTML loads the playfield and runtime from one versioned release', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'invaders-pages-'));
+  t.after(() => {
+    assert.equal(path.dirname(path.resolve(root)), path.resolve(os.tmpdir()));
+    assert.ok(path.basename(root).startsWith('invaders-pages-'));
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+  const source = path.join(root, 'source'); fs.mkdirSync(source);
+  const icons = ['icon.png'];
+  for (const name of ['index.html', 'game.html', 'launcher.js', 'game.js']) {
+    fs.copyFileSync(new URL(`../web/${name}`, import.meta.url), path.join(source, name));
+  }
+  for (const name of ['wasm_exec.js', 'game.wasm', ...icons]) fs.writeFileSync(path.join(source, name), name);
+  const first = path.join(root, 'first');
+  const hash = packagePages(source, first, 'abc');
+  assert.match(fs.readFileSync(path.join(first, 'index.html'), 'utf8'), new RegExp(`assets/${hash}/launcher.js`));
+  for (const folder of [source, first]) {
+    const index = fs.readFileSync(path.join(folder, 'index.html'), 'utf8');
+    assert.doesNotMatch(index, /id="launch"|Launch game|src="[^\"]*""/);
+    const frame = index.match(/<iframe\b[^>]*\bsrc="([^"]+)"[^>]*><\/iframe>/);
+    assert.ok(frame, 'one well-formed iframe loads automatically');
+    assert.equal((index.match(/<iframe\b/g) || []).length, 1);
+    assert.ok(index.indexOf('src="' + (folder === source ? '' : `assets/${hash}/`) + 'launcher.js"') < index.indexOf('<iframe'), 'status listener loads before the iframe');
+    const gamePath = path.join(folder, frame[1]);
+    assert.ok(fs.existsSync(gamePath), 'iframe target exists');
+    assert.equal(path.basename(gamePath), 'game.html');
+    const game = fs.readFileSync(gamePath, 'utf8');
+    assert.doesNotMatch(game, /<iframe\b/);
+    assert.match(game, /<script src="wasm_exec.js"><\/script>\s*<script src="game.js"><\/script>/);
+    for (const htmlPath of [path.join(folder, 'index.html'), gamePath]) {
+      const html = fs.readFileSync(htmlPath, 'utf8');
+      for (const [, reference] of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
+        if (/^https:\/\//.test(reference)) continue;
+        assert.ok(fs.existsSync(path.resolve(path.dirname(htmlPath), reference)), `missing ${reference}`);
+      }
+    }
+  }
+  assert.equal(gunzipSync(fs.readFileSync(path.join(first, `assets/${hash}/game.wasm.gz`))).toString(), 'game.wasm');
+  assert.ok(fs.existsSync(path.join(first, '404.html')));
+  assert.match(fs.readFileSync(path.join(first, 'index.html'), 'utf8'), new RegExp(`href="assets/${hash}/icon.png"`));
+  for (const icon of icons) assert.equal(fs.readFileSync(path.join(first, `assets/${hash}/${icon}`), 'utf8'), icon);
+  assert.match(fs.readFileSync(path.join(first, `assets/${hash}/game.js`), 'utf8'), /game\.wasm\.gz/);
+  assert.doesNotMatch(fs.readFileSync(path.join(first, '_headers'), 'utf8'), /Content-Encoding/);
+  assert.match(fs.readFileSync(path.join(first, '_headers'), 'utf8'), /immutable/);
+  assert.equal(packagePages(source, path.join(root, 'same')), hash);
+  fs.writeFileSync(path.join(source, 'icon.png'), 'new icon');
+  assert.notEqual(packagePages(source, path.join(root, 'new-icon')), hash);
+  fs.writeFileSync(path.join(source, 'wasm_exec.js'), 'new runtime');
+  assert.notEqual(packagePages(source, path.join(root, 'new')), hash);
+  assert.throws(() => packagePages(source, first), /EEXIST/);
+});
