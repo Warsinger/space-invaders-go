@@ -11,9 +11,13 @@ and hostname. It never creates projects or changes account settings.
 Pushes to main publish automatically after all native tests/vet/coverage/builds
 and browser checks succeed. Deployment jobs are serialized and a superseded
 main revision is rejected. The downloaded artifact's version.json must match
-the workflow SHA. Cloudflare's official `wrangler-action@v4` handles upload,
-linked summaries and GitHub deployments, with Wrangler pinned to 4.151.1.
-Project/artifact checks and preview comments remain candidates for later reuse.
+the workflow SHA. Publishing, project validation, preview comments and their tests
+live in [cloudflare-pages-deploy](https://github.com/Warsinger/cloudflare-pages-deploy).
+This repository retains its build/package checks and a small workflow caller.
+Both the reusable workflow and its script checkout are pinned to the same full
+shared commit; update both references together after reviewing shared changes.
+The shared workflow wraps Cloudflare's official Wrangler action, pinned with
+Wrangler 4.151.1, and receives only the explicit repository secrets below.
 
 For a preview, manually dispatch **Go build** on the open PR branch with `deploy`
 enabled and `preview_pr` set to its number. Only the current head of an open,
