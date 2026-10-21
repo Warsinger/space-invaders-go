@@ -11,7 +11,9 @@ and hostname. It never creates projects or changes account settings.
 Pushes to main publish automatically after all native tests/vet/coverage/builds
 and browser checks succeed. Deployment jobs are serialized and a superseded
 main revision is rejected. The downloaded artifact's version.json must match
-the workflow SHA. Wrangler is pinned to 4.151.1, matching the tested Tower
+the workflow SHA. Cloudflare’s official `cloudflare/wrangler-action@v4` installs and runs
+Wrangler; our scripts validate before uploading and revalidate before reporting.
+Wrangler is pinned to 4.151.1, matching the tested Tower
 Defense deployment tooling. Review pinned tool updates as ordinary changes.
 
 For a preview, manually dispatch **Go build** on the open PR branch with `deploy`
@@ -51,3 +53,12 @@ production rollback and roll-forward path with publishing idle. Preview
 deployments are not production rollback targets; the next main deployment can
 supersede a rollback. High scores belong to each site origin and are not copied
 between previews and production.
+
+## Remaining shared scaffolding
+
+The repository still owns target/project validation, artifact revision checks,
+manual preview policy, concurrency, and the updateable PR comment and linked
+summary. These are candidates for a later shared repository; app builds, tests
+and Pages packaging remain app-specific. The official action owns Wrangler
+installation and upload. Deployment URLs come from its Pages outputs and are
+checked against the expected hostname before being reported.

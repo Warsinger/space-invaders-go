@@ -132,11 +132,32 @@ jobs:
         with:
           name: space-invaders-web
           path: build/pages
-      - name: Validate project and publish static bundle
+      - name: Validate deployment target and artifact
+        id: target
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           GITHUB_TOKEN: ${{ github.token }}
           PREVIEW_PR: ${{ inputs.preview_pr }}
           WRANGLER_SEND_METRICS: 'false'
-        run: node scripts/deploy-pages.mjs
+        run: node scripts/deploy-pages.mjs validate
+      - name: Publish with Cloudflare Wrangler
+        id: publish
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.151.1'
+          packageManager: npm
+          command: pages deploy build/pages --project-name alien-invaders --branch ${{ steps.target.outputs.branch }} --commit-hash ${{ github.sha }} --commit-dirty=false
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+      - name: Report deployment and update preview comment
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PREVIEW_PR: ${{ inputs.preview_pr }}
+          DEPLOYMENT_URL: ${{ steps.publish.outputs.deployment-url }}
+          DEPLOYMENT_ALIAS_URL: ${{ steps.publish.outputs.pages-deployment-alias-url }}
+        run: node scripts/deploy-pages.mjs report

@@ -2,7 +2,6 @@ import { updatePreviewComment } from './preview-comment.mjs';
 import { pagesProject } from './pages-project.mjs';
 import { deploymentBranch } from './pages-target.mjs';
 import fs from 'node:fs';
-import { spawnSync } from 'node:child_process';
 
 const project = 'alien-invaders';
 const account = process.env.CLOUDFLARE_ACCOUNT_ID;
@@ -31,18 +30,19 @@ const hostname = config.subdomain;
 if (hostname !== 'alien-invaders.pages.dev') throw new Error('Unexpected Pages hostname');
 const version = JSON.parse(fs.readFileSync('build/pages/version.json', 'utf8'));
 if (version.revision !== sha) throw new Error('Artifact revision does not match the checked workflow revision');
-const command = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-const publish = spawnSync(command, ['--yes', 'wrangler@4.151.1', 'pages', 'deploy', 'build/pages',
-  '--project-name', project, '--branch', branch, '--commit-hash', sha, '--commit-dirty=false'],
-  { env: process.env, stdio: 'inherit', windowsHide: true });
-if (publish.error || publish.status !== 0) throw new Error('Cloudflare upload failed');
-const url = branch === 'main' ? `https://${hostname}/` : `https://${branch}.${hostname}/`;
-console.log(`Open the game: ${url}`);
-if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
-  `## Space Invaders deployment\n\n[Open the game](${url})\n\nRevision: \`${sha}\`\n`);
-
-if (branch !== 'main') {
-  await deploymentBranch(process.env, github);
-  await updatePreviewComment(github, process.env.PREVIEW_PR, url, sha,
-    `https://github.com/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}`);
+const mode = process.argv[2];
+if (mode === 'validate') {
+  if (!process.env.GITHUB_OUTPUT) throw new Error('Missing Actions output file');
+  fs.appendFileSync(process.env.GITHUB_OUTPUT, `branch=${branch}\n`);
+} else if (mode === 'report') {
+  const { deploymentLinks } = await import('./deployment-links.mjs');
+  const { url, deploymentURL } = deploymentLinks(branch, process.env.DEPLOYMENT_URL, process.env.DEPLOYMENT_ALIAS_URL);
+  if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+    `## Space Invaders deployment\n\n[Open the game](${url}) · [This deployment](${deploymentURL})\n\nRevision: \`${sha}\`\n`);
+  if (branch !== 'main') {
+    await updatePreviewComment(github, process.env.PREVIEW_PR, url, sha,
+      `https://github.com/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}`);
+  }
+} else {
+  throw new Error('Choose validate or report');
 }
