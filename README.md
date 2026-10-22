@@ -85,3 +85,5 @@ Recent development
 
 ## Gameplay Video
 [Gameplay on Youtube](https://youtu.be/7HiF58Qha1s)
+
+Browser builds now require Node 24+ and `npm ci --ignore-scripts` before the existing Go web command. Shared styling and browser lifecycle come from the exact locked [web-shared](https://github.com/Warsinger/web-shared) revision; native builds and game rules are unchanged.

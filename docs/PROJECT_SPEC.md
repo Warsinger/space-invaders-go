@@ -43,3 +43,5 @@ Architecture: `game` owns lifecycle, collisions, scoring and overlays;
 embeds images/sounds/fonts; `scores` isolates storage; `platform` isolates browser
 hooks; `cmd/web` builds and serves the browser bundle. There is no application
 backend or remote score collection.
+
+The browser shell uses a pinned, locally bundled Warsinger/web-shared revision. App-specific content, settings/controls and simulation/storage stay in this repository; native behavior is unchanged. See BROWSER.md for installation and update steps.

@@ -56,3 +56,5 @@ production rollback and roll-forward path with publishing idle. Preview
 deployments are not production rollback targets; the next main deployment can
 supersede a rollback. High scores belong to each site origin and are not copied
 between previews and production.
+
+The browser job installs the integrity-locked shared browser package with npm ci --ignore-scripts. Shared modules/styles are included in the app asset hash and Pages upload. No hosting target, credentials or production publication policy changes are required.
