@@ -36,3 +36,5 @@ score files separately. A successful Wasm build is not a graphical support claim
 Remaining limits: no exhaustive browser/OS graphics matrix, touch controls,
 automated sound verification or CI browser gameplay automation. Coverage reports
 are informational, not a guarantee that rendering and randomness are tested.
+
+Install browser assets with `npm ci --ignore-scripts` before browser tests/builds. Shared loader/status/frame behavior tests live in web-shared; this repo tests its own packaged references and options/storage where applicable.

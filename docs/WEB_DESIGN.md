@@ -10,7 +10,7 @@ The owner prefers the newer footer used by Game of Life and Rover. This page fol
 
 Each link retains the existing safe new-tab behavior, with noopener/noreferrer and an accessible new-tab announcement, so navigation preserves the active app. Links remain underlined and have a visible keyboard focus outline. Keep existing attribution elsewhere; do not invent asset credits or licensing claims.
 
-The footer stays in normal document flow outside the canvas/iframe. It may wrap on narrow screens. In Math Viz's full-height flex page, retain flex: none on the footer and flex: 1; min-height: 0 on the canvas so the footer does not cover plotting controls. Each repository owns this small static copy; no shared JavaScript, remote stylesheet, build dependency or coordinated deployment is needed.
+The footer stays in normal document flow outside the canvas/iframe. It may wrap on narrow screens. In Math Viz's full-height flex page, retain flex: none on the footer and flex: 1; min-height: 0 on the canvas so the footer does not cover plotting controls. Each repository retains its local footer HTML/links; the layout and footer CSS now come from the exact locked web-shared package and are bundled into each deployment.
 
 ## Markup
 
