@@ -17,7 +17,7 @@ node scripts/package-pages.mjs
 
 Linux graphics/audio packages and a display are needed for packages that import
 Ebitengine; CI installs the dependencies and uses Xvfb. Unit tests do not start a
-game loop. CI tests/vets/builds Linux amd64, Windows amd64, macOS arm64/amd64,
+game loop. CI tests/vets/builds Linux amd64, Windows amd64, macOS arm64,
 reports Linux coverage and uploads binaries plus a browser-ready artifact.
 
 The focused tests cover high-score parsing/native persistence, score accumulation
