@@ -4,7 +4,7 @@ Single-player arcade Space Invaders in Go using Donburi ECS and Ebitengine.
 
 ## Build and test
 
-Use Go 1.27.2, matching go.mod:
+Use Go 1.27.3, matching go.mod:
 
 ```sh
 go mod download

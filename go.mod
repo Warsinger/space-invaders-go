@@ -1,6 +1,6 @@
 module space-invaders
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/hajimehoshi/ebiten/v2 v2.10.5
