@@ -1,6 +1,6 @@
 # Browser build
 
-Use Go 1.27.2 (go.mod) and Node 24+. Run `npm ci --ignore-scripts`, then `go run ./cmd/web -serve`. Open
+Use Go 1.27.3 (go.mod) and Node 24+. Run `npm ci --ignore-scripts`, then `go run ./cmd/web -serve`. Open
 http://localhost:8080; use `-port 8085` if another app is running. The server binds
 to localhost and disables caching. Do not open HTML via `file://`.
 
