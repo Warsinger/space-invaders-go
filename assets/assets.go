@@ -126,3 +126,12 @@ func PlaySound(name string) {
 func GetImage(name string) *ebiten.Image {
 	return images[name]
 }
+
+// StopSounds silences a run when returning to its waiting title screen.
+func StopSounds() {
+	for _, sound := range sounds {
+		if sound != nil {
+			sound.Pause()
+		}
+	}
+}

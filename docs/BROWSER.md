@@ -9,11 +9,15 @@ js/wasm and copies wasm_exec.js from the exact same Go installation. No Go
 cross-compilation environment variables need to be set. The old root HTML and
 wasmpackage.sh prototype are replaced by this portable command.
 
-The game loads automatically, with instructions and the shared project footer
-below it. Keyboard focus moves to the game canvas once it is ready. Click inside
-if focus is lost; sound still requires browser interaction. Left/Right move,
-Space fires, P pauses and R restarts. Q is native-only. Space/arrows do not scroll
-while gameplay has focus. The 600×800 logical board scales with its frame.
+The game loads automatically to its in-game title, with instructions and the
+shared project footer below it. Keyboard focus moves to the game canvas once it is ready. Click inside
+if focus is lost; sound still requires browser interaction. Click/tap Start Game
+or press Space / Enter to begin. Left/Right move, Space fires and P pauses.
+R / Esc ends the run and returns to the title; explicitly start again for a fresh
+run. Q is native-only. Space/arrows/Enter/Escape do not scroll while gameplay has
+focus. The 600×800 logical board scales with its frame, including viewport-height
+sizing to keep the Start button visible. Touch can start a run; movement/fire
+still require a keyboard.
 
 High scores save under localStorage key `space-invaders.highscore.v1`. Storage is
 origin-scoped (including port), separate from native files and other apps. A
@@ -33,4 +37,4 @@ gzip payloads. No service worker or backend is needed. See DEPLOYMENT.md.
 
 Node 24+ installs the exact integrity-locked Warsinger/web-shared commit before browser builds: npm ci --ignore-scripts. Native builds remain independent of npm. The builder copies the required shared modules/styles into build/web/shared/ and keeps wasm_exec.js from its own compiling Go toolchain. Pages hashes these files with the app, so every deployment is self-contained and makes no cross-site runtime requests. Update shared code through a reviewed dependency/lockfile change and verify a preview.
 
-Invaders keeps immediate gameplay, keyboard controls, sound, icon and namespaced high-score storage. The shared simple embed handles ready/error/focus messages using a fresh session and configures the existing spaceInvadersReady callback. Footer HTML/links remain local; one shared footer stylesheet supports each layout. Common lifecycle/Go-loader tests are in web-shared. Consumer tests check options where applicable and real packaged references, icons, gzip and shared-style invalidation.
+Invaders owns its title screen, keyboard controls, sound, icon and namespaced high-score storage. The shared simple embed handles ready/error/focus messages using a fresh session and configures the existing spaceInvadersReady callback. Footer HTML/links remain local; one shared footer stylesheet supports each layout. Common lifecycle/Go-loader tests are in web-shared. Consumer tests check options where applicable and real packaged references, icons, gzip and shared-style invalidation.

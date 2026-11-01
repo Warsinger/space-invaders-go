@@ -1,1 +1,4 @@
 @import './shared/embed.css';
+
+/* Keep the in-game Start button visible in an ordinary browser window. */
+iframe { width: min(600px, 100%, max(240px, calc(75dvh - 165px))); }

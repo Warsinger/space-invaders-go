@@ -2,11 +2,17 @@
 
 Space Invaders is a single-player arcade game written in Go using Ebitengine for
 graphics/input/audio and Donburi for ECS state. `main.go` parses `-level` (default
-1, minimum 1), creates and initializes the game, then runs the Ebitengine loop.
+1, minimum 1), creates the game in title state, then runs the Ebitengine loop.
+The title uses the same in-game composition as Tower Defense: high score, game
+title, existing sprites, controls and a blue Start Game button. Click/tap the
+button or press Space / Enter to create a run. Waiting on the title never advances
+simulation or plays gameplay sounds; the start input is consumed without firing.
 
 The board is 600×800. A player near the bottom moves horizontally with arrow keys
-and fires one shot for each Space press. A hit kills the player; R resets the run
-to the configured starting level. P toggles pause. Q saves and exits on native
+and fires one shot for each Space press. A hit kills the player. R / Esc ends the
+current run and returns to the title from play, pause or game over, stopping
+sounds and clearing run entities. The next explicit start resets to the configured
+starting level and score zero while retaining the high score. P toggles pause. Q saves and exits on native
 builds and is ignored in browsers.
 
 Aliens begin in 4 rows × 8 columns, alternating two embedded sprites. Levels
@@ -28,7 +34,7 @@ storage is relative to the working directory at `score/highscore.txt`; missing
 directories are created on save. Browser storage uses
 `space-invaders.highscore.v1` on the current origin, with a session fallback when
 localStorage is blocked or fails. High-score improvements save immediately;
-restart, game-over and native quit also attempt saving. Save failures warn rather
+starting a run, returning to title, game-over and native quit also attempt saving. Save failures warn rather
 than stopping gameplay. Browser/native stores are independent.
 
 The browser uses the same gameplay/assets in a fixed logical board scaled by the

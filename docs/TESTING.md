@@ -22,12 +22,18 @@ reports Linux coverage and uploads binaries plus a browser-ready artifact.
 
 The focused tests cover high-score parsing/native persistence, score accumulation
 and reset, bullet expiry, player bounds, barrier damage/count, alien movement,
-and collision consumption/player death. Browser tests exercise raw/gzip runtime
+and collision consumption/player death. Title tests cover waiting without simulation,
+start input consumption, pause/resume, R / Esc returning to title, fresh entity
+counts on repeated starts, configured starting level, high-score retention and
+native quit from the title. Button bounds cover inside/outside edges. Browser tests exercise raw/gzip runtime
 loading, automatic ready/error feedback, real HTML references and all five
 localStorage scenarios (normal, throwing getter/getItem/setItem, missing).
 
-Manual checklist: open the website and confirm automatic gameplay/loading;
-click to focus/unlock audio; move left/right; fire; pause/resume; restart; observe
+Manual checklist: open the website and confirm loading completes on a waiting
+title with high score and a visible Start Game button. Start by click/tap, Space
+and Enter; check the start Space does not also fire. Move left/right; fire;
+pause/resume; use R / Esc from play, pause and game over to return to title;
+start a fresh run and confirm score/level reset but high score retained. Observe
 alien/barrier hits and game over; reload and check high score; test a narrow
 viewport and confirm stable board geometry; check keyboard focus, error feedback
 and footer link. Q must not terminate the browser. Check native quit and relative
@@ -38,3 +44,9 @@ automated sound verification or CI browser gameplay automation. Coverage reports
 are informational, not a guarantee that rendering and randomness are tested.
 
 Install browser assets with `npm ci --ignore-scripts` before browser tests/builds. Shared loader/status/frame behavior tests live in web-shared; this repo tests its own packaged references and options/storage where applicable.
+
+Issue #7 validation: Go tests/vet/native build, Wasm build, packaged HTML and all
+five actual Go/Wasm storage cases passed locally on Windows. Browser checks
+covered the waiting title, button/Enter/Space start, pause and return to title.
+Native executable launch succeeded with an isolated score fixture, but native
+app-control approval timed out; native visual/input/audio checks remain manual.
