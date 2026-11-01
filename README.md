@@ -20,15 +20,18 @@ graphics/audio libraries and display described in CI; headless checks use Xvfb.
 ## Browser
 
 Run `go run ./cmd/web -serve` and open http://localhost:8080. The game loads
-automatically with keyboard focus; audio requires interaction. High scores persist in this browser
+automatically to an in-game title screen with keyboard focus; audio requires interaction.
+Click/tap Start Game or press Space / Enter when ready. High scores persist in this browser
 with a session fallback when storage is blocked. Cloudflare publishing uses the
 owner-provisioned `alien-invaders.pages.dev` project; see the deployment guide.
 
 ## Controls
 
 - Left/Right arrows: move.
-- Space: fire one shot per press.
-- P: pause/resume. R: restart at the starting level.
+- Start Game / Space / Enter on the title: begin a fresh run.
+- Space during play: fire one shot per press.
+- P: pause/resume.
+- R / Esc: end the current run and return to the title. Start again at the configured starting level.
 - Q: save and quit (native only).
 
 Native high scores use `score/highscore.txt` relative to the working directory.

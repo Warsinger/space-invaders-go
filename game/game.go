@@ -19,6 +19,7 @@ import (
 type GameInfo struct {
 	world         donburi.World
 	ecs           *ecslib.ECS
+	onTitle       bool
 	gameOver      bool
 	paused        bool
 	level         int
@@ -48,6 +49,7 @@ func NewGame(level int) (*GameInfo, error) {
 
 	return &GameInfo{
 		world:         world,
+		onTitle:       true,
 		ecs:           ecs,
 		level:         level,
 		highScore:     highScore,
@@ -105,33 +107,29 @@ func (g *GameInfo) GetECS() *ecslib.ECS {
 }
 
 func (g *GameInfo) Update() error {
-	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		if err := g.SaveScores(); err != nil {
-			fmt.Printf("WARN save high score: %v\n", err)
-		}
-		if err := g.Clear(); err != nil {
-			return err
-		}
-		if err := g.Init(); err != nil {
-			return err
-		}
+	board := comp.Board.Get(comp.Board.MustFirst(g.world))
+	input := menuInput{
+		start: inpututil.IsKeyJustPressed(ebiten.KeySpace) || inpututil.IsKeyJustPressed(ebiten.KeyEnter),
+		reset: inpututil.IsKeyJustPressed(ebiten.KeyR),
+		title: inpututil.IsKeyJustPressed(ebiten.KeyEscape),
+		pause: inpututil.IsKeyJustPressed(ebiten.KeyP),
+		quit:  !platform.Browser && inpututil.IsKeyJustPressed(ebiten.KeyQ),
 	}
-	if !platform.Browser && inpututil.IsKeyJustPressed(ebiten.KeyQ) {
-		g.EndGame()
-		return ebiten.Termination
+	if g.onTitle {
+		input.start = input.start || startButtonPressed(startButtonBounds(board.Width, board.Height))
 	}
+	return g.updateWithInput(input)
+}
 
-	if g.gameOver {
-		return nil
+func (g *GameInfo) updateWithInput(input menuInput) error {
+	stopped, err := g.handleMenuInput(input)
+	if err != nil || stopped {
+		return err
 	}
+	return g.updateRun()
+}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
-		g.paused = !g.paused
-	}
-	if g.paused {
-		return nil
-	}
-
+func (g *GameInfo) updateRun() error {
 	// query for all entities that have position and velocity and ???
 	// and have them do their updates
 	query := donburi.NewQuery(
@@ -314,6 +312,10 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 		platform.Ready()
 		g.ready = true
 	}
+	if g.onTitle {
+		g.drawTitle(screen)
+		return
+	}
 	screen.Clear()
 
 	img := assets.GetImage("backgroundV")
@@ -369,6 +371,9 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 		x, y := text.Measure(str, assets.ScoreFace, op.LineSpacing)
 		op.GeoM.Translate(halfWidth-x/2, halfHeight-y/2)
 		text.Draw(screen, str, assets.ScoreFace, op)
+		infoFace := *assets.ScoreFace
+		infoFace.Size = 20
+		centeredText(screen, "R / Esc title", &infoFace, float64(board.Width), halfHeight+35)
 	} else if g.paused {
 		// draw paused
 		str := "PAUSED"
@@ -376,6 +381,9 @@ func (g *GameInfo) Draw(screen *ebiten.Image) {
 		x, y := text.Measure(str, assets.ScoreFace, op.LineSpacing)
 		op.GeoM.Translate(halfWidth-x/2, halfHeight-y/2)
 		text.Draw(screen, str, assets.ScoreFace, op)
+		infoFace := *assets.ScoreFace
+		infoFace.Size = 20
+		centeredText(screen, "P resume / R / Esc title", &infoFace, float64(board.Width), halfHeight+35)
 	}
 }
 
